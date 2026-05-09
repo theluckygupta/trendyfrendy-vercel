@@ -16,7 +16,7 @@ export default function Home() {
 
 </div>
       {/* NAVBAR */}
-<nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-8 py-6 bg-black/40 backdrop-blur-md z-50 border-b border-white/10">
+<nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-8 py-5 bg-black z-50 border-b border-white/10">
 
   <h1 className="text-2xl font-bold tracking-[0.2em] uppercase">
     TrendyFrendy
@@ -86,7 +86,7 @@ export default function Home() {
   }}
 />
 
-<div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
+<div className="absolute inset-0 bg-black/70" />
 
         <div className="relative z-10 animate-[fadeIn_1.5s_ease]">
 
@@ -118,7 +118,7 @@ export default function Home() {
 
       {/* COLLECTIONS */}
       {/* LUXURY MARQUEE */}
-<div className="overflow-hidden border-y border-white/10 py-6 bg-black">
+<div className="overflow-hidden border-y border-white/10 py-4 bg-black">
 
   <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] text-[#d6c2a8] uppercase tracking-[0.4em] text-sm">
 
