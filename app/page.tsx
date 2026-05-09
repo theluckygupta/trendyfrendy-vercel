@@ -353,7 +353,7 @@ export default function Home() {
       </footer>
 {/* FLOATING WHATSAPP BUTTON */}
 <a
-  href="https://wa.me/91YOURNUMBER"
+  href="https://wa.me/919426892200"
   target="_blank"
   className="fixed bottom-6 right-6 bg-[#25D366] text-white px-6 py-4 rounded-full shadow-2xl text-lg font-semibold hover:scale-110 transition duration-300 z-50"
 >
