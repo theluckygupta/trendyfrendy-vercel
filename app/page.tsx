@@ -1,9 +1,13 @@
 "use client";
+import {
+  collection,
+  getDocs,
+} from "firebase/firestore";
 
+import { db } from "@/lib/firebase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { products } from "@/data/products";
 import PageTransition from "@/components/PageTransition";
 
 export default function Home() {
@@ -13,6 +17,29 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+
+  async function fetchProducts() {
+
+    const querySnapshot = await getDocs(
+      collection(db, "products")
+    );
+
+    const fetchedProducts =
+      querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+    setProducts(fetchedProducts);
+
+  }
+
+  fetchProducts();
+
+}, []);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
@@ -434,13 +461,12 @@ export default function Home() {
 
                 </div>
 
-                <a
-                  href="https://wa.me/919426892200"
-                  target="_blank"
-                  className="block mt-6 bg-white text-black text-center py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
-                >
-                  Proceed to WhatsApp Order
-                </a>
+                <Link
+  href="/checkout"
+  className="block mt-6 bg-white text-black text-center py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
+>
+  Proceed to Checkout
+</Link>
 
               </div>
 
