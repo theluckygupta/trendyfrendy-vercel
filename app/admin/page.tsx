@@ -95,10 +95,10 @@ export default function AdminPage() {
     />
 
     <input
-      type="text"
-      placeholder="Image URL"
-      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
-    />
+  type="file"
+  accept="image/*"
+  className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 outline-none file:mr-4 file:border-0 file:bg-white file:text-black file:px-4 file:py-2 file:rounded-full"
+ />
 
     <textarea
       placeholder="Description"
@@ -114,6 +114,7 @@ export default function AdminPage() {
 
   </div>
 
+</div>
             <div className="bg-[#111] rounded-[2rem] p-10 border border-white/10">
 
               <p className="text-gray-400 mb-4">
