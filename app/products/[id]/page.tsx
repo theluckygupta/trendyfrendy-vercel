@@ -208,7 +208,7 @@ export default async function ProductPage({
             </p>
 
             <a
-              href="https://wa.me/91942682200"
+              href="https://wa.me/917019650441"
               target="_blank"
               className="inline-block bg-white text-black px-10 py-4 rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition"
             >

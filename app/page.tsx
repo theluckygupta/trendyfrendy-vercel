@@ -174,7 +174,7 @@ export default function Home() {
             </p>
 
             <a
-              href="https://wa.me/919426892200"
+              href="https://wa.me/917019650441"
               target="_blank"
               className="inline-block mt-10 px-10 py-4 bg-white text-black rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition duration-300"
             >
