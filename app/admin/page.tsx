@@ -1,15 +1,4 @@
 "use client";
-import {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-} from "firebase/auth";
-
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
-
-const [user, setUser] = useState<any>(null);
-
-import { auth } from "@/lib/firebase";
 
 import { useEffect, useState } from "react";
 
@@ -24,9 +13,23 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-import { db, storage } from "@/lib/firebase";
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+
+import {
+  db,
+  storage,
+  auth,
+} from "@/lib/firebase";
 
 export default function AdminPage() {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [user, setUser] = useState<any>(null);
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -41,34 +44,34 @@ export default function AdminPage() {
 
   useEffect(() => {
 
-  const unsubscribe =
-    onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe =
+      onAuthStateChanged(auth, (currentUser) => {
 
-      setUser(currentUser);
+        setUser(currentUser);
 
-    });
+      });
 
-  return () => unsubscribe();
+    return () => unsubscribe();
 
-}, []);  
+  }, []);
 
-async function login() {
+  async function login() {
 
-  try {
+    try {
 
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-  } catch (error) {
+    } catch (error) {
 
-    alert("Invalid login");
+      alert("Invalid login");
+
+    }
 
   }
-
-}
 
   async function addProduct() {
 
@@ -136,50 +139,50 @@ async function login() {
 
   if (!user) {
 
-  return (
+    return (
 
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+      <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
 
-      <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md space-y-6">
 
-        <h1 className="text-4xl font-bold mb-10">
-          Admin Login
-        </h1>
+          <h1 className="text-4xl font-bold mb-10">
+            Admin Login
+          </h1>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-          className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
-        />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-          className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
-        />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
+          />
 
-        <button
-          onClick={login}
-          className="w-full bg-white text-black py-5 rounded-full font-semibold"
-        >
-          Login
-        </button>
+          <button
+            onClick={login}
+            className="w-full bg-white text-black py-5 rounded-full font-semibold"
+          >
+            Login
+          </button>
 
-      </div>
+        </div>
 
-    </main>
+      </main>
 
-  );
+    );
 
-}
+  }
 
   return (
 
