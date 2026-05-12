@@ -11,7 +11,7 @@ const [user, setUser] = useState<any>(null);
 
 import { auth } from "@/lib/firebase";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   collection,
