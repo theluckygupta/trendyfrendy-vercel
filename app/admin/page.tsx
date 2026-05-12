@@ -1,4 +1,15 @@
 "use client";
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+
+const [user, setUser] = useState<any>(null);
+
+import { auth } from "@/lib/firebase";
 
 import { useState } from "react";
 
@@ -27,6 +38,37 @@ export default function AdminPage() {
 
   const [loading, setLoading] =
     useState(false);
+
+  useEffect(() => {
+
+  const unsubscribe =
+    onAuthStateChanged(auth, (currentUser) => {
+
+      setUser(currentUser);
+
+    });
+
+  return () => unsubscribe();
+
+}, []);  
+
+async function login() {
+
+  try {
+
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+  } catch (error) {
+
+    alert("Invalid login");
+
+  }
+
+}
 
   async function addProduct() {
 
@@ -91,6 +133,53 @@ export default function AdminPage() {
     }
 
   }
+
+  if (!user) {
+
+  return (
+
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+
+      <div className="w-full max-w-md space-y-6">
+
+        <h1 className="text-4xl font-bold mb-10">
+          Admin Login
+        </h1>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+          className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
+          className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
+        />
+
+        <button
+          onClick={login}
+          className="w-full bg-white text-black py-5 rounded-full font-semibold"
+        >
+          Login
+        </button>
+
+      </div>
+
+    </main>
+
+  );
+
+}
 
   return (
 
