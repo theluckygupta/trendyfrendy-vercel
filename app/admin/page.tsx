@@ -7,24 +7,35 @@ import {
   addDoc,
 } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+
+import { db, storage } from "@/lib/firebase";
 
 export default function AdminPage() {
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
-  const [imageFile, setImageFile] = useState<any>(null);
   const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [category, setCategory] = useState("");
+
+  const [imageFile, setImageFile] =
+    useState<any>(null);
+
+  const [loading, setLoading] =
+    useState(false);
 
   async function addProduct() {
 
     if (
       !name ||
       !price ||
-      !image ||
-      !description
+      !description ||
+      !category ||
+      !imageFile
     ) {
       alert("Please fill all fields");
       return;
@@ -33,43 +44,38 @@ export default function AdminPage() {
     try {
 
       setLoading(true);
-      let imageUrl = "";
 
-if (imageFile) {
+      const storageRef = ref(
+        storage,
+        `products/${Date.now()}-${imageFile.name}`
+      );
 
-  const storageRef = ref(
-    storage,
-    `products/${Date.now()}-${imageFile.name}`
-  );
+      await uploadBytes(
+        storageRef,
+        imageFile
+      );
 
-  await uploadBytes(
-    storageRef,
-    imageFile
-  );
-
-  imageUrl = await getDownloadURL(
-    storageRef
-  );
-
-}
+      const imageUrl =
+        await getDownloadURL(storageRef);
 
       await addDoc(
         collection(db, "products"),
         {
           name,
           price,
-          image: imageUrl,
           description,
+          category,
+          image: imageUrl,
           createdAt: Date.now(),
         }
       );
 
-      alert("Product Added!");
+      alert("Product Added Successfully!");
 
       setName("");
       setPrice("");
-      setImage("");
       setDescription("");
+      setCategory("");
       setImageFile(null);
 
     } catch (error) {
@@ -92,9 +98,17 @@ if (imageFile) {
 
       <div className="max-w-3xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-16">
-          Admin Dashboard
-        </h1>
+        <div className="mb-16">
+
+          <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
+            TrendyFrendy
+          </p>
+
+          <h1 className="text-5xl font-bold">
+            Admin Dashboard
+          </h1>
+
+        </div>
 
         <div className="space-y-6">
 
@@ -102,7 +116,9 @@ if (imageFile) {
             type="text"
             placeholder="Product Name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
             className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
           />
 
@@ -110,17 +126,21 @@ if (imageFile) {
             type="text"
             placeholder="Price"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) =>
+              setPrice(e.target.value)
+            }
             className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
           />
 
           <input
-  type="file"
-  onChange={(e) =>
-    setImageFile(e.target.files?.[0])
-  }
-  className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none"
- />
+            type="text"
+            placeholder="Category"
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value)
+            }
+            className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
+          />
 
           <textarea
             placeholder="Description"
@@ -132,12 +152,24 @@ if (imageFile) {
             className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
           />
 
+          <input
+            type="file"
+            onChange={(e) =>
+              setImageFile(
+                e.target.files?.[0]
+              )
+            }
+            className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5"
+          />
+
           <button
             onClick={addProduct}
             disabled={loading}
             className="w-full bg-white text-black py-5 rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition"
           >
-            {loading ? "Adding..." : "Add Product"}
+            {loading
+              ? "Adding Product..."
+              : "Add Product"}
           </button>
 
         </div>
