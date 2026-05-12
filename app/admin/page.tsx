@@ -64,6 +64,55 @@ export default function AdminPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
+            {/* ADD PRODUCT */}
+
+<div className="mt-20 bg-[#111] rounded-[2rem] p-10 border border-white/10">
+
+  <div className="mb-10">
+
+    <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
+      Product Management
+    </p>
+
+    <h2 className="text-4xl font-bold">
+      Add Product
+    </h2>
+
+  </div>
+
+  <div className="grid gap-6">
+
+    <input
+      type="text"
+      placeholder="Product Name"
+      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
+    />
+
+    <input
+      type="text"
+      placeholder="Price"
+      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
+    />
+
+    <input
+      type="text"
+      placeholder="Image URL"
+      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
+    />
+
+    <textarea
+      placeholder="Description"
+      rows={5}
+      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
+    />
+
+    <button
+      className="bg-white text-black py-5 rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition"
+    >
+      Add Product
+    </button>
+
+  </div>
 
             <div className="bg-[#111] rounded-[2rem] p-10 border border-white/10">
 
