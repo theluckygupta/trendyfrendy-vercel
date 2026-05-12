@@ -327,7 +327,7 @@ export default function Home() {
 
         {/* WHATSAPP */}
         <a
-          href="https://wa.me/919426892200"
+          href="https://wa.me/917019650441"
           target="_blank"
           className="fixed bottom-6 right-6 bg-[#25D366] text-white px-6 py-4 rounded-full shadow-2xl text-lg font-semibold hover:scale-110 hover:shadow-[0_0_30px_rgba(37,211,102,0.5)] transition duration-300 z-50"
         >
@@ -374,7 +374,7 @@ export default function Home() {
                 </p>
 
                 <a
-                  href="https://wa.me/919426892200"
+                  href="https://wa.me/917019650441"
                   target="_blank"
                   className="inline-block bg-white text-black px-10 py-4 rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition text-center"
                 >

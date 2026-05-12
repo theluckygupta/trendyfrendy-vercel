@@ -147,7 +147,7 @@ export default function CheckoutPage() {
           </div>
 
           <a
-            href={`https://wa.me/919426892200?text=${whatsappMessage}`}
+            href={`https://wa.me/917019650441?text=${whatsappMessage}`}
             target="_blank"
             className="block mt-10 bg-white text-black text-center py-5 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
           >
