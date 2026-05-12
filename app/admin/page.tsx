@@ -10,6 +10,9 @@ export default function AdminPage() {
   const [password, setPassword] =
     useState("");
 
+  const [loggedIn, setLoggedIn] =
+    useState(false);
+
   function login() {
 
     if (
@@ -17,13 +20,94 @@ export default function AdminPage() {
       password === "Lucky@1998$"
     ) {
 
-      alert("Login successful");
+      setLoggedIn(true);
 
     } else {
 
       alert("Invalid credentials");
 
     }
+
+  }
+
+  if (loggedIn) {
+
+    return (
+
+      <main className="min-h-screen bg-black text-white px-6 py-20">
+
+        <div className="max-w-6xl mx-auto">
+
+          <div className="flex justify-between items-center mb-16">
+
+            <div>
+
+              <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
+                TrendyFrendy
+              </p>
+
+              <h1 className="text-5xl font-bold">
+                Admin Dashboard
+              </h1>
+
+            </div>
+
+            <button
+              onClick={() =>
+                setLoggedIn(false)
+              }
+              className="border border-white/10 px-6 py-3 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
+            >
+              Logout
+            </button>
+
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+
+            <div className="bg-[#111] rounded-[2rem] p-10 border border-white/10">
+
+              <p className="text-gray-400 mb-4">
+                Total Products
+              </p>
+
+              <h2 className="text-5xl font-bold">
+                3
+              </h2>
+
+            </div>
+
+            <div className="bg-[#111] rounded-[2rem] p-10 border border-white/10">
+
+              <p className="text-gray-400 mb-4">
+                Orders
+              </p>
+
+              <h2 className="text-5xl font-bold">
+                0
+              </h2>
+
+            </div>
+
+            <div className="bg-[#111] rounded-[2rem] p-10 border border-white/10">
+
+              <p className="text-gray-400 mb-4">
+                Revenue
+              </p>
+
+              <h2 className="text-5xl font-bold">
+                ₹0
+              </h2>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    );
 
   }
 
