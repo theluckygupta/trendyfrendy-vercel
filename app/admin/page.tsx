@@ -13,8 +13,8 @@ export default function AdminPage() {
   function login() {
 
     if (
-      email === "admin@trendyfrendy.com" &&
-      password === "123456"
+      email === "theluckygupta" &&
+      password === "Lucky@1998$"
     ) {
 
       alert("Login successful");
