@@ -82,9 +82,13 @@ export default function Home() {
         {/* NAVBAR */}
         <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-8 py-5 bg-black z-50 border-b border-white/10">
 
-          <h1 className="text-2xl font-bold tracking-[0.2em] uppercase text-white">
-            TrendyFrendy
-          </h1>
+          <Link href="/">
+  <img
+    src="/nav.png"
+    alt="TrendyFrendy Logo"
+    className="h-12 md:h-14 w-auto"
+  />
+</Link>
 
           <div className="hidden md:flex gap-6 text-sm uppercase tracking-widest">
             <a href="#collections" className="hover:text-[#d6c2a8] transition">
