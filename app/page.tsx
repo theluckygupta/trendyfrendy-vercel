@@ -85,7 +85,7 @@ export default function Home() {
           <Link href="/">
   <img
     src="/nav.png"
-    alt="TrendyFrendy Logo"
+    alt="TrendyFrenzy Logo"
     className="h-12 md:h-14 w-auto"
   />
 </Link>
@@ -170,7 +170,7 @@ export default function Home() {
             <h1 className="text-6xl md:text-8xl font-black leading-tight">
               TRENDY
               <br />
-              FRENDY
+              FRENZY
             </h1>
 
             <p className="mt-8 text-lg md:text-2xl text-gray-300 max-w-2xl mx-auto">
@@ -365,7 +365,7 @@ export default function Home() {
           className="border-t border-white/10 py-10 text-center text-gray-500"
         >
           <p>
-            © 2026 TrendyFrendy — Surat Fashion Brand
+            © 2026 TrendyFrenzy — Surat Fashion Brand
           </p>
         </footer>
 
@@ -402,7 +402,7 @@ export default function Home() {
               <div className="p-10 flex flex-col justify-center">
 
                 <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
-                  TrendyFrendy Collection
+                  TrendyFrenzy Collection
                 </p>
 
                 <h2 className="text-5xl font-bold mb-6">

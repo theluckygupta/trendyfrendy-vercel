@@ -20,6 +20,16 @@ export async function POST(
       process.env
         .NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
+    console.log(
+      "CLOUD:",
+      cloudName
+    );
+
+    console.log(
+      "PRESET:",
+      uploadPreset
+    );
+
     const formData =
       new FormData();
 
@@ -45,9 +55,9 @@ export async function POST(
     const data =
       await response.json();
 
-    return NextResponse.json({
-      url: data.secure_url,
-    });
+    console.log(data);
+
+    return NextResponse.json(data);
 
   } catch (error) {
 

@@ -29,7 +29,7 @@ export default function CheckoutPage() {
 
   const whatsappMessage = encodeURIComponent(
 
-    `Hello TrendyFrendy,%0A%0AI want to order:%0A${cartItems
+    `Hello TrendyFrenzy,%0A%0AI want to order:%0A${cartItems
       .map(
         (item) =>
           `• ${item.name} - ${item.price}`
@@ -49,7 +49,7 @@ export default function CheckoutPage() {
           href="/"
           className="text-2xl font-bold tracking-[0.2em] uppercase text-white"
         >
-          TrendyFrendy
+          TrendyFrenzy
         </Link>
 
         <Link

@@ -1,19 +1,120 @@
 "use client";
 
 import {
+  doc,
+  getDoc,
+} from "firebase/firestore";
+
+import {
+  db,
+} from "@/lib/firebase";
+
+import {
+  useEffect,
   useState,
 } from "react";
 
-export default function ProductClient({
-  product,
-}: {
-  product: any;
-}) {
+import {
+  useParams,
+} from "next/navigation";
 
-  const [selectedImage] =
-    useState(
-      product.mainImage
+export default function ProductClient() {
+
+  const params =
+    useParams();
+
+  const [product, setProduct] =
+    useState<any>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [selectedImage, setSelectedImage] =
+    useState("");
+
+  useEffect(() => {
+
+    async function fetchProduct() {
+
+      try {
+
+        if (!params?.id) {
+
+          setLoading(false);
+
+          return;
+
+        }
+
+        const docRef = doc(
+          db,
+          "products",
+          String(params.id)
+        );
+
+        const docSnap =
+          await getDoc(docRef);
+
+        if (docSnap.exists()) {
+
+          const data: any = {
+
+            id:
+              docSnap.id,
+
+            ...docSnap.data(),
+
+          };
+
+          setProduct(data);
+
+          setSelectedImage(
+            data.mainImage || ""
+          );
+
+        }
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+      setLoading(false);
+
+    }
+
+    fetchProduct();
+
+  }, [params]);
+
+  if (loading) {
+
+    return (
+
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+
+        Loading...
+
+      </div>
+
     );
+
+  }
+
+  if (!product) {
+
+    return (
+
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+
+        Product Not Found
+
+      </div>
+
+    );
+
+  }
 
   return (
 
@@ -21,19 +122,39 @@ export default function ProductClient({
 
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20">
 
+        {/* IMAGE */}
+
         <div>
 
           <div className="overflow-hidden rounded-[2rem] bg-[#111]">
 
-            <img
-              src={selectedImage}
-              alt={product.name}
-              className="w-full h-[750px] object-cover"
-            />
+            {(selectedImage ||
+              product.mainImage) ? (
+
+              <img
+                src={
+                  selectedImage ||
+                  product.mainImage
+                }
+                alt={product.name}
+                className="w-full h-[750px] object-cover"
+              />
+
+            ) : (
+
+              <div className="w-full h-[750px] flex items-center justify-center text-gray-500">
+
+                No Image
+
+              </div>
+
+            )}
 
           </div>
 
         </div>
+
+        {/* CONTENT */}
 
         <div className="flex flex-col justify-center">
 
@@ -75,6 +196,36 @@ export default function ProductClient({
               </p>
 
             )}
+
+          </div>
+
+          {/* DETAILS */}
+
+          <div className="space-y-3 mb-10 text-gray-300">
+
+            <p>
+              Top Length:
+              {" "}
+              {product.topLength || "-"}
+            </p>
+
+            <p>
+              Bottom Length:
+              {" "}
+              {product.bottomLength || "-"}
+            </p>
+
+            <p>
+              Sleeves:
+              {" "}
+              {product.sleeves || "-"}
+            </p>
+
+            <p>
+              Size:
+              {" "}
+              {product.size || "-"}
+            </p>
 
           </div>
 

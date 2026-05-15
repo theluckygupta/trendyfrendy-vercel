@@ -71,6 +71,92 @@ export default function EditProductPage() {
 
   }
 
+  async function handleImages(
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+
+  const files = e.target.files;
+
+  if (!files) return;
+
+  setSaving(true);
+
+  const uploadedUrls: string[] = [];
+
+  try {
+
+    for (const file of Array.from(files)) {
+
+      const reader =
+        new FileReader();
+
+      const base64Promise =
+        new Promise<string>((resolve) => {
+
+          reader.onloadend = () => {
+
+            resolve(
+              reader.result as string
+            );
+
+          };
+
+        });
+
+      reader.readAsDataURL(file);
+
+      const base64 =
+        await base64Promise;
+
+      const response =
+        await fetch("/api/upload", {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            file: base64,
+          }),
+
+        });
+
+      const data =
+        await response.json();
+
+      if (data?.url) {
+
+        uploadedUrls.push(
+          data.url
+        );
+
+      }
+
+    }
+
+    setProduct({
+      ...product,
+      mainImage:
+        uploadedUrls[0] || "",
+      images:
+        uploadedUrls,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("Upload failed");
+
+  }
+
+  setSaving(false);
+
+}
+
   async function saveProduct() {
 
     try {
@@ -103,6 +189,9 @@ export default function EditProductPage() {
 
           stock:
             product.stock,
+
+          sizes:
+  product.sizes || [],  
 
           mainImage:
             product.mainImage,
@@ -192,23 +281,41 @@ export default function EditProductPage() {
 
         <div className="bg-white border border-gray-200 rounded-3xl p-6">
 
-          <label className="block mb-4 font-semibold">
+  <label className="block mb-4 font-semibold">
 
-            Product Image
+    Product Images
 
-          </label>
+  </label>
 
-          <img
-            src={
-              product.mainImage ||
-              "https://placehold.co/500x600"
-            }
-            alt=""
-            className="w-60 rounded-2xl object-cover"
-          />
+  <input
+    type="file"
+    multiple
+    accept="image/*"
+    onChange={handleImages}
+    className="mb-6"
+  />
 
-        </div>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
+    {(product.images || []).map(
+      (
+        image: string,
+        index: number
+      ) => (
+
+        <img
+          key={index}
+          src={image}
+          alt=""
+          className="w-full h-48 rounded-2xl object-cover border"
+        />
+
+      )
+    )}
+
+  </div>
+
+</div>
         {/* TITLE */}
 
         <div className="bg-white border border-gray-200 rounded-3xl p-6">
@@ -342,7 +449,72 @@ export default function EditProductPage() {
         </div>
 
         {/* CATEGORY + STOCK */}
+<div className="bg-white border border-gray-200 rounded-3xl p-6">
 
+  <label className="block mb-4 font-semibold">
+
+    Available Sizes
+
+  </label>
+
+  <div className="flex gap-3 flex-wrap">
+
+    {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
+
+      <button
+        key={size}
+        type="button"
+        onClick={() => {
+
+          const current =
+            product.sizes || [];
+
+          if (
+            current.includes(size)
+          ) {
+
+            setProduct({
+              ...product,
+              sizes:
+                current.filter(
+                  (
+                    s: string
+                  ) =>
+                    s !== size
+                ),
+            });
+
+          } else {
+
+            setProduct({
+              ...product,
+              sizes: [
+                ...current,
+                size,
+              ],
+            });
+
+          }
+
+        }}
+        className={`px-5 py-3 rounded-xl border transition ${
+          (
+            product.sizes || []
+          ).includes(size)
+            ? "bg-black text-white border-black"
+            : "bg-white border-gray-300"
+        }`}
+      >
+
+        {size}
+
+      </button>
+
+    ))}
+
+  </div>
+
+</div>
         <div className="grid md:grid-cols-2 gap-6">
 
           <div className="bg-white border border-gray-200 rounded-3xl p-6">

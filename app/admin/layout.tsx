@@ -49,20 +49,20 @@ export default function AdminLayout({
 
   return (
 
-    <div className="min-h-screen flex bg-[#f5f5f5]">
+    <div className="min-h-screen md:flex bg-[#f5f5f5]">
 
       {/* SIDEBAR */}
 
-      <aside className="w-[260px] bg-white border-r border-gray-200 p-6">
+      <aside className="hidden md:block w-[260px] bg-white border-r border-gray-200 p-6">
 
         <div className="mb-10">
 
           <h1 className="text-3xl font-black">
-            TrendyFrendy
+            TrendyFrenzy
           </h1>
 
           <p className="text-gray-500 text-sm mt-1">
-            Shopify Style Admin
+            Admin Panel 
           </p>
 
         </div>
@@ -134,7 +134,7 @@ export default function AdminLayout({
 
       {/* CONTENT */}
 
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-4 md:p-10 overflow-x-hidden">
         {children}
       </main>
 

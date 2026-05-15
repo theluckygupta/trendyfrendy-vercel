@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
         </h1>
 
         <p className="text-gray-400 mb-10">
-          TrendyFrendy Admin Access
+          TrendyFrenzy Admin Access
         </p>
 
         <div className="space-y-5">
