@@ -246,72 +246,112 @@ export default function Home() {
 
           </div>
 
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-14">
 
             {filteredProducts.map((product) => (
 
               <Link
-                key={product.id}
-                href={`/products/${product.id}`}
-                className="group transition duration-500 hover:-translate-y-2"
-              >
+  key={product.id}
+  href={`/products/${product.id}`}
+  className="group transition duration-500 hover:-translate-y-2"
+>
 
-                <div className="overflow-hidden rounded-[2rem] bg-[#111] hover:shadow-[0_0_40px_rgba(214,194,168,0.15)]">
+  {/* IMAGE */}
 
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-[500px] w-full object-cover group-hover:scale-110 transition duration-700"
-                  />
+  <div className="relative overflow-hidden rounded-[32px] bg-[#111] h-[520px] mb-6 hover:shadow-[0_0_40px_rgba(214,194,168,0.15)]">
 
-                </div>
+    <img
+      src={product.mainImage || product.image}
+      alt={product.name}
+      className="h-full w-full object-cover group-hover:scale-110 transition duration-700"
+    />
 
-                <div className="mt-6">
+    {/* OVERLAY */}
 
-                  <div className="flex justify-between items-center">
+    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-                    <h3 className="text-2xl font-semibold">
-                      {product.name}
-                    </h3>
+    {/* BADGE */}
 
-                    <span className="text-[#d6c2a8] text-lg">
-                      {product.price}
-                    </span>
+    <div className="absolute top-5 left-5 bg-white text-black text-xs px-4 py-2 rounded-full font-semibold">
 
-                  </div>
+      NEW
 
-                  <p className="text-gray-400 mt-2">
-                    {product.description}
-                  </p>
+    </div>
 
-                  <div className="flex gap-4 mt-6">
+  </div>
 
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setSelectedProduct(product);
-                      }}
-                      className="border border-white/10 px-6 py-3 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
-                    >
-                      Quick View
-                    </button>
+  {/* INFO */}
 
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCartItems((prev) => [...prev, product]);
-                        setCartOpen(true);
-                      }}
-                      className="border border-white/10 px-6 py-3 rounded-full bg-white text-black hover:bg-[#d6c2a8] transition"
-                    >
-                      Add to Cart
-                    </button>
+  <div>
 
-                  </div>
+    <p className="uppercase tracking-[0.25em] text-[#d6c2a8] text-xs mb-3">
 
-                </div>
+      {product.category || "Luxury Collection"}
 
-              </Link>
+    </p>
+
+    <h3 className="text-2xl font-semibold mb-3">
+      {product.name}
+    </h3>
+
+    <p className="text-gray-400 mb-5 leading-7 line-clamp-2">
+
+      {product.shortDescription || product.description}
+
+    </p>
+
+    {/* PRICE */}
+
+    <div className="flex items-center gap-4 mb-6">
+
+      <p className="text-3xl font-bold">
+
+        ₹{product.salePrice || product.price}
+
+      </p>
+
+      {product.salePrice && (
+
+        <p className="text-gray-500 line-through">
+
+          ₹{product.price}
+
+        </p>
+
+      )}
+
+    </div>
+
+    {/* BUTTONS */}
+
+    <div className="flex gap-4">
+
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          setSelectedProduct(product);
+        }}
+        className="border border-white/10 px-6 py-3 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
+      >
+        Quick View
+      </button>
+
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          setCartItems((prev) => [...prev, product]);
+          setCartOpen(true);
+        }}
+        className="border border-white/10 px-6 py-3 rounded-full bg-white text-black hover:bg-[#d6c2a8] transition"
+      >
+        Add to Cart
+      </button>
+
+    </div>
+
+  </div>
+
+</Link>
 
             ))}
 
@@ -353,7 +393,7 @@ export default function Home() {
 
               <div>
                 <img
-                  src={selectedProduct.image}
+                  src={selectedProduct.mainImage || selectedProduct.image}
                   alt={selectedProduct.name}
                   className="h-full w-full object-cover"
                 />
@@ -370,7 +410,7 @@ export default function Home() {
                 </h2>
 
                 <p className="text-3xl text-[#d6c2a8] mb-8">
-                  {selectedProduct.price}
+                  ₹{selectedProduct.salePrice || selectedProduct.price}
                 </p>
 
                 <p className="text-gray-400 leading-relaxed mb-10">
@@ -421,7 +461,7 @@ export default function Home() {
                 >
 
                   <img
-                    src={item.image}
+                    src={item.mainImage || item.image}
                     alt={item.name}
                     className="w-24 h-28 object-cover rounded-xl"
                   />
