@@ -9,7 +9,7 @@ import {
 
 import {
   db,
-} from "../../../../lib/firebase";
+} from "@/lib/firebase";
 
 export default function NewProductPage() {
 
@@ -46,82 +46,67 @@ export default function NewProductPage() {
   const [sizes, setSizes] =
     useState<string[]>([]);
 
-  const [images, setImages] =
-    useState<string[]>([]);
+  const [mainImage, setMainImage] =
+    useState("");
+
+  const [leftImage, setLeftImage] =
+    useState("");
+
+  const [rightImage, setRightImage] =
+    useState("");
+
+  const [backImage, setBackImage] =
+    useState("");
+
+  const [productOnlyImage, setProductOnlyImage] =
+    useState("");
+
+  const [productVideo, setProductVideo] =
+    useState("");
 
   const [loading, setLoading] =
     useState(false);
 
-  async function handleImages(
-    e: React.ChangeEvent<HTMLInputElement>
+  async function uploadFile(
+    file: File,
+    type: "image" | "video"
   ) {
 
-    const files = e.target.files;
+    const formData =
+      new FormData();
 
-    if (!files) return;
+    formData.append(
+      "file",
+      file
+    );
 
-    setLoading(true);
+    formData.append(
+      "upload_preset",
+      "trendyfrenzy"
+    );
 
-    try {
+    const endpoint =
+      type === "video"
 
-      const uploadedUrls: string[] = [];
+        ? "https://api.cloudinary.com/v1_1/dk3unll8y/video/upload"
 
-      for (const file of Array.from(files)) {
+        : "https://api.cloudinary.com/v1_1/dk3unll8y/image/upload";
 
-       const formData =
-  new FormData();
-
-formData.append(
-  "file",
-  file
-);
-
-formData.append(
-  "upload_preset",
-  "trendyfrenzy"
-);
-
-const response =
-  await fetch(
-    "https://api.cloudinary.com/v1_1/dk3unll8y/image/upload",
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-const uploadData =
-  await response.json();
-
-console.log(uploadData);
-
-if (
-  uploadData.secure_url
-) {
-
-  uploadedUrls.push(
-    uploadData.secure_url
-  );
-
-}
-
-      }
-
-      setImages(uploadedUrls);
-
-      console.log(uploadedUrls);
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert(
-        "Image upload failed"
+    const response =
+      await fetch(
+        endpoint,
+        {
+          method: "POST",
+          body: formData,
+        }
       );
 
-    }
+    const data =
+      await response.json();
 
-    setLoading(false);
+    return (
+      data.secure_url || ""
+    );
 
   }
 
@@ -134,50 +119,47 @@ if (
       const productData = {
 
         name:
-          title || "",
+          title,
 
-        shortDescription:
-          shortDescription || "",
+        shortDescription,
 
-        description:
-          description || "",
+        description,
 
-        category:
-          category || "",
+        category,
 
         price:
-          Number(price) || 0,
+          Number(price),
 
         salePrice:
-          Number(salePrice) || 0,
+          Number(salePrice),
 
         stock:
-          Number(stock) || 0,
+          Number(stock),
 
-        topLength:
-          topLength || "",
+        topLength,
 
-        bottomLength:
-          bottomLength || "",
+        bottomLength,
 
-        sleeves:
-          sleeves || "",
+        sleeves,
 
-        sizes:
-          sizes || [],
+        sizes,
 
-        mainImage:
-          images[0] || "",
+        mainImage,
 
-        images:
-          images || [],
+        leftImage,
+
+        rightImage,
+
+        backImage,
+
+        productOnlyImage,
+
+        productVideo,
 
         createdAt:
           new Date().toISOString(),
 
       };
-
-      console.log(productData);
 
       await addDoc(
         collection(
@@ -188,7 +170,7 @@ if (
       );
 
       alert(
-        "Product Added Successfully"
+        "Product Added Successfully 😎"
       );
 
     } catch (error) {
@@ -214,11 +196,15 @@ if (
         <div>
 
           <h1 className="text-4xl font-bold mb-2">
+
             Add Product
+
           </h1>
 
           <p className="text-gray-500">
+
             Product Creation
+
           </p>
 
         </div>
@@ -239,12 +225,18 @@ if (
 
       <div className="grid lg:grid-cols-[1fr_350px] gap-8">
 
+        {/* LEFT */}
+
         <div className="space-y-6">
+
+          {/* TITLE */}
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
             <label className="block mb-3 font-medium">
+
               Product Title
+
             </label>
 
             <input
@@ -255,16 +247,19 @@ if (
                   e.target.value
                 )
               }
-              placeholder="One Piece Kurti"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
             />
 
           </div>
 
+          {/* SHORT DESCRIPTION */}
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
             <label className="block mb-3 font-medium">
+
               Short Description
+
             </label>
 
             <textarea
@@ -275,36 +270,42 @@ if (
                   e.target.value
                 )
               }
-              placeholder="Short product summary"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none resize-none"
             />
 
           </div>
 
+          {/* FULL DESCRIPTION */}
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
             <label className="block mb-3 font-medium">
+
               Full Description
+
             </label>
 
             <textarea
-              rows={10}
+              rows={8}
               value={description}
               onChange={(e) =>
                 setDescription(
                   e.target.value
                 )
               }
-              placeholder="Write full product description"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none resize-none"
             />
 
           </div>
 
+          {/* PRODUCT DETAILS */}
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
             <h2 className="text-xl font-semibold mb-6">
+
               Product Details
+
             </h2>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -318,7 +319,7 @@ if (
                   )
                 }
                 placeholder="Top Length"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
+                className="border border-gray-300 rounded-xl px-4 py-3 outline-none"
               />
 
               <input
@@ -330,7 +331,7 @@ if (
                   )
                 }
                 placeholder="Bottom Length"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
+                className="border border-gray-300 rounded-xl px-4 py-3 outline-none"
               />
 
               <input
@@ -342,78 +343,80 @@ if (
                   )
                 }
                 placeholder="Sleeves"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
+                className="border border-gray-300 rounded-xl px-4 py-3 outline-none"
               />
 
-              <div className="md:col-span-2">
+            </div>
 
-                <label className="block mb-4 font-medium">
-                  Available Sizes
-                </label>
+            <div className="mt-8">
 
-                <div className="flex gap-3 flex-wrap">
+              <label className="block mb-4 font-medium">
 
-                  {[
-                    "XS",
-                    "S",
-                    "M",
-                    "L",
-                    "XL",
-                    "XXL",
-                    "3XL",
-                    "4XL",
-                    "5XL",
-                    "6XL",
-                    "7XL",
-                    "8XL",
-                    "9XL",
-                    "10XL",
-                  ].map((item) => (
+                Available Sizes
 
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => {
+              </label>
 
-                        if (
-                          sizes.includes(
-                            item
-                          )
-                        ) {
+              <div className="flex gap-3 flex-wrap">
 
-                          setSizes(
-                            sizes.filter(
-                              (s) =>
-                                s !== item
-                            )
-                          );
+                {[
+                  "XS",
+                  "S",
+                  "M",
+                  "L",
+                  "XL",
+                  "XXL",
+                  "3XL",
+                  "4XL",
+                  "5XL",
+                  "6XL",
+                  "7XL",
+                  "8XL",
+                  "9XL",
+                  "10XL",
+                ].map((item) => (
 
-                        } else {
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => {
 
-                          setSizes([
-                            ...sizes,
-                            item,
-                          ]);
-
-                        }
-
-                      }}
-                      className={`px-5 py-3 rounded-xl border transition ${
+                      if (
                         sizes.includes(
                           item
                         )
-                          ? "bg-black text-white border-black"
-                          : "bg-white border-gray-300"
-                      }`}
-                    >
+                      ) {
 
-                      {item}
+                        setSizes(
+                          sizes.filter(
+                            (s) =>
+                              s !== item
+                          )
+                        );
 
-                    </button>
+                      } else {
 
-                  ))}
+                        setSizes([
+                          ...sizes,
+                          item,
+                        ]);
 
-                </div>
+                      }
+
+                    }}
+                    className={`px-5 py-3 rounded-xl border transition ${
+                      sizes.includes(
+                        item
+                      )
+                        ? "bg-black text-white border-black"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+
+                    {item}
+
+                  </button>
+
+                ))}
 
               </div>
 
@@ -421,37 +424,120 @@ if (
 
           </div>
 
+          {/* MEDIA */}
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
-            <label className="block mb-4 font-medium">
-              Product Images
-            </label>
+            <h2 className="text-xl font-semibold mb-8">
 
-            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center">
+              Product Media
 
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImages}
-              />
+            </h2>
 
-            </div>
+            <div className="space-y-8">
 
-            <div className="grid grid-cols-3 gap-4 mt-6">
+              {[
+                {
+                  label:
+                    "Main Image",
+                  setter:
+                    setMainImage,
+                  type:
+                    "image",
+                },
 
-              {images.map(
+                {
+                  label:
+                    "Left Side",
+                  setter:
+                    setLeftImage,
+                  type:
+                    "image",
+                },
+
+                {
+                  label:
+                    "Right Side",
+                  setter:
+                    setRightImage,
+                  type:
+                    "image",
+                },
+
+                {
+                  label:
+                    "Back Side",
+                  setter:
+                    setBackImage,
+                  type:
+                    "image",
+                },
+
+                {
+                  label:
+                    "Product Only Image",
+                  setter:
+                    setProductOnlyImage,
+                  type:
+                    "image",
+                },
+
+                {
+                  label:
+                    "Video / Reel",
+                  setter:
+                    setProductVideo,
+                  type:
+                    "video",
+                },
+
+              ].map(
                 (
-                  image,
+                  item,
                   index
                 ) => (
 
-                  <img
-                    key={index}
-                    src={image}
-                    alt=""
-                    className="w-full h-40 object-cover rounded-xl"
-                  />
+                  <div key={index}>
+
+                    <label className="block mb-3 font-medium">
+
+                      {item.label}
+
+                    </label>
+
+                    <input
+                      type="file"
+                      accept={
+                        item.type ===
+                        "video"
+
+                          ? "video/*"
+
+                          : "image/*"
+                      }
+                      onChange={async (e) => {
+
+                        const file =
+                          e.target.files?.[0];
+
+                        if (!file) return;
+
+                        setLoading(true);
+
+                        const url =
+                          await uploadFile(
+                            file,
+                            item.type as any
+                          );
+
+                        item.setter(url);
+
+                        setLoading(false);
+
+                      }}
+                    />
+
+                  </div>
 
                 )
               )}
@@ -462,12 +548,18 @@ if (
 
         </div>
 
+        {/* RIGHT */}
+
         <div className="space-y-6">
+
+          {/* ORGANIZATION */}
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
             <h2 className="text-xl font-semibold mb-6">
+
               Organization
+
             </h2>
 
             <div className="space-y-5">
@@ -475,7 +567,9 @@ if (
               <div>
 
                 <label className="block mb-3 font-medium">
+
                   Category
+
                 </label>
 
                 <input
@@ -486,7 +580,6 @@ if (
                       e.target.value
                     )
                   }
-                  placeholder="Cotton"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
                 />
 
@@ -495,7 +588,9 @@ if (
               <div>
 
                 <label className="block mb-3 font-medium">
+
                   Stock
+
                 </label>
 
                 <input
@@ -506,7 +601,6 @@ if (
                       e.target.value
                     )
                   }
-                  placeholder="12"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
                 />
 
@@ -516,10 +610,14 @@ if (
 
           </div>
 
+          {/* PRICING */}
+
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
 
             <h2 className="text-xl font-semibold mb-6">
+
               Pricing
+
             </h2>
 
             <div className="space-y-5">
@@ -527,7 +625,9 @@ if (
               <div>
 
                 <label className="block mb-3 font-medium">
+
                   Original Price
+
                 </label>
 
                 <input
@@ -538,7 +638,6 @@ if (
                       e.target.value
                     )
                   }
-                  placeholder="1299"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
                 />
 
@@ -547,7 +646,9 @@ if (
               <div>
 
                 <label className="block mb-3 font-medium">
+
                   Sale Price
+
                 </label>
 
                 <input
@@ -558,7 +659,6 @@ if (
                       e.target.value
                     )
                   }
-                  placeholder="999"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
                 />
 

@@ -111,9 +111,8 @@ export default function ProductPage() {
 
     <>
 
-      <Navbar
+     <Navbar
   cartCount={0}
-  onCartOpen={() => {}}
 />
 
       <div className="pt-24">

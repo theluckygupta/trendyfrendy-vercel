@@ -1,14 +1,14 @@
 "use client";
+
 import Link from "next/link";
+
+import ProductReviews from "@/components/ProductReviews";
 
 import {
   doc,
   getDoc,
   collection,
-  addDoc,
   getDocs,
-  query,
-  where,
 } from "firebase/firestore";
 
 import {
@@ -37,24 +37,11 @@ export default function ProductClient() {
 
   const [selectedImage, setSelectedImage] =
     useState("");
-    const [reviews, setReviews] =
-  useState<any[]>([]);
 
-const [rating, setRating] =
-  useState(5);
-
-const [reviewText, setReviewText] =
-  useState("");
-
-const [userName, setUserName] =
-  useState("");
-
-const [submitting, setSubmitting] =
-  useState(false);
-    const [
-  similarProducts,
-  setSimilarProducts,
-] = useState<any[]>([]);
+  const [
+    similarProducts,
+    setSimilarProducts,
+  ] = useState<any[]>([]);
 
   const [selectedSize, setSelectedSize] =
     useState("");
@@ -96,64 +83,41 @@ const [submitting, setSubmitting] =
           setProduct(data);
 
           setSelectedImage(
-            data.mainImage ||
-            data.images?.[0] ||
-            ""
+            data.mainImage || ""
           );
-          const reviewsQuery =
-  query(
-    collection(
-      db,
-      "reviews"
-    ),
-    where(
-      "productId",
-      "==",
-      data.id
-    )
-  );
 
-const reviewSnapshot =
-  await getDocs(
-    reviewsQuery
-  );
-
-const fetchedReviews =
-  reviewSnapshot.docs.map(
-    (doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })
-  );
-
-setReviews(
-  fetchedReviews
-);
           const querySnapshot =
-  await getDocs(
-    collection(
-      db,
-      "products"
-    )
-  );
+            await getDocs(
+              collection(
+                db,
+                "products"
+              )
+            );
 
-const similar =
-  querySnapshot.docs
-    .map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
-    .filter(
-      (item: any) =>
-        item.category ===
-          data.category &&
-        item.id !== data.id
-    )
-    .slice(0, 4);
+          const similar =
+            querySnapshot.docs
+              .map((doc) => ({
 
-setSimilarProducts(
-  similar
-);
+                id:
+                  doc.id,
+
+                ...doc.data(),
+
+              }))
+              .filter(
+                (item: any) =>
+
+                  item.category ===
+                    data.category &&
+
+                  item.id !==
+                    data.id
+              )
+              .slice(0, 4);
+
+          setSimilarProducts(
+            similar
+          );
 
         }
 
@@ -170,72 +134,7 @@ setSimilarProducts(
     fetchProduct();
 
   }, [params]);
-async function submitReview() {
 
-  if (
-    !reviewText ||
-    !userName
-  ) return;
-
-  try {
-
-    setSubmitting(true);
-
-    await addDoc(
-      collection(
-        db,
-        "reviews"
-      ),
-      {
-
-        productId:
-          product.id,
-
-        userName,
-
-        rating,
-
-        review:
-          reviewText,
-
-        createdAt:
-          new Date(),
-
-      }
-    );
-
-    setReviews((prev) => [
-
-      ...prev,
-
-      {
-
-        userName,
-
-        rating,
-
-        review:
-          reviewText,
-
-      },
-
-    ]);
-
-    setReviewText("");
-
-    setUserName("");
-
-    setRating(5);
-
-  } catch (error) {
-
-    console.log(error);
-
-  }
-
-  setSubmitting(false);
-
-}
   if (loading) {
 
     return (
@@ -263,26 +162,20 @@ async function submitReview() {
     );
 
   }
-  const averageRating =
 
-  reviews.length > 0
+  const galleryImages = [
 
-    ? (
-        reviews.reduce(
-          (
-            total,
-            item
-          ) =>
+    product.mainImage,
 
-            total +
-            item.rating,
+    product.leftImage,
 
-          0
-        ) /
-        reviews.length
-      ).toFixed(1)
+    product.rightImage,
 
-    : "5.0";
+    product.backImage,
+
+    product.productOnlyImage,
+
+  ].filter(Boolean);
 
   return (
 
@@ -296,71 +189,56 @@ async function submitReview() {
 
           <div className="overflow-hidden rounded-[2rem] bg-[#111]">
 
-            {(selectedImage ||
-              product.mainImage) ? (
-
-              <img
-                src={
-                  selectedImage ||
-                  product.mainImage
-                }
-                alt={product.name}
-                className="w-full h-[450px] md:h-[750px] object-cover"
-              />
-
-            ) : (
-
-              <div className="w-full h-[450px] md:h-[750px] flex items-center justify-center text-gray-500">
-
-                No Image
-
-              </div>
-
-            )}
+            <img
+              src={
+                selectedImage ||
+                product.mainImage
+              }
+              alt={product.name}
+              className="w-full h-[450px] md:h-[750px] object-cover"
+            />
 
           </div>
 
           {/* THUMBNAILS */}
 
-          {product.images?.length > 0 && (
+          <div className="flex gap-4 overflow-x-auto pb-2">
 
-            <div className="flex gap-4 overflow-x-auto pb-2">
+            {galleryImages.map(
+              (
+                image: string,
+                index: number
+              ) => (
 
-              {product.images.map(
-                (
-                  image: string,
-                  index: number
-                ) => (
-
-                  <button
-                    key={index}
-                    onClick={() =>
-                      setSelectedImage(
-                        image
-                      )
-                    }
-                    className={`border-2 rounded-2xl overflow-hidden min-w-[90px] h-[110px] transition ${
-                      selectedImage ===
+                <button
+                  key={index}
+                  onClick={() =>
+                    setSelectedImage(
                       image
-                        ? "border-white"
-                        : "border-transparent"
-                    }`}
-                  >
+                    )
+                  }
+                  className={`border-2 rounded-2xl overflow-hidden min-w-[90px] h-[110px] transition ${
+                    selectedImage ===
+                    image
 
-                    <img
-                      src={image}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
+                      ? "border-white"
 
-                  </button>
+                      : "border-transparent"
+                  }`}
+                >
 
-                )
-              )}
+                  <img
+                    src={image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
 
-            </div>
+                </button>
 
-          )}
+              )
+            )}
+
+          </div>
 
         </div>
 
@@ -408,47 +286,33 @@ async function submitReview() {
             )}
 
           </div>
-<div className="flex items-center gap-4 mb-10">
 
-  <div className="flex text-yellow-400 text-2xl">
-
-    ★★★★★
-
-  </div>
-
-  <p className="text-lg text-gray-300">
-
-    {averageRating}
-    {" "}
-    (
-    {reviews.length}
-    {" "}
-    Reviews
-    )
-
-  </p>
-
-</div>
           {/* DETAILS */}
 
           <div className="space-y-4 mb-10 text-gray-300">
 
             <p>
+
               Top Length:
               {" "}
               {product.topLength || "-"}
+
             </p>
 
             <p>
+
               Bottom Length:
               {" "}
               {product.bottomLength || "-"}
+
             </p>
 
             <p>
+
               Sleeves:
               {" "}
               {product.sleeves || "-"}
+
             </p>
 
             {/* SIZE SELECTION */}
@@ -480,7 +344,9 @@ async function submitReview() {
                         className={`px-5 py-2 rounded-xl border transition ${
                           selectedSize ===
                           size
+
                             ? "bg-white text-black border-white"
+
                             : "border-gray-600 text-white"
                         }`}
                       >
@@ -509,7 +375,9 @@ async function submitReview() {
           <a
             href={`https://wa.me/917019650441?text=Hi, I want to order ${product.name}${
               selectedSize
+
                 ? ` in size ${selectedSize}`
+
                 : ""
             }`}
             target="_blank"
@@ -523,248 +391,108 @@ async function submitReview() {
         </div>
 
       </div>
-{/* SIMILAR PRODUCTS */}
 
-<section className="max-w-7xl mx-auto mt-32">
+      {/* SIMILAR PRODUCTS */}
 
-  <div className="mb-12">
+      <section className="max-w-7xl mx-auto mt-32">
 
-    <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
+        <div className="mb-12">
 
-      You May Also Like
+          <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
 
-    </p>
-
-    <h2 className="text-4xl md:text-5xl font-bold">
-
-      Similar Products
-
-    </h2>
-
-  </div>
-
-  <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-10">
-
-    {similarProducts.map(
-      (item: any) => (
-
-        <Link
-          key={item.id}
-          href={`/products/${item.id}`}
-          className="group"
-        >
-
-          <div className="overflow-hidden rounded-[2rem] bg-[#111] mb-5">
-
-            <img
-              src={
-                item.mainImage
-              }
-              alt={item.name}
-              className="w-full h-[350px] object-cover group-hover:scale-105 transition duration-500"
-            />
-
-          </div>
-
-          <p className="uppercase tracking-[0.25em] text-[#d6c2a8] text-xs mb-3">
-
-            {item.category}
+            You May Also Like
 
           </p>
 
-          <h3 className="text-2xl font-semibold mb-3">
+          <h2 className="text-4xl md:text-5xl font-bold">
 
-            {item.name}
+            Similar Products
 
-          </h3>
-
-          <p className="text-gray-400 line-clamp-2 mb-4">
-
-            {
-              item.shortDescription
-            }
-
-          </p>
-
-          <div className="flex items-center gap-4">
-
-            <p className="text-2xl font-bold">
-
-              ₹
-              {item.salePrice ||
-                item.price}
-
-            </p>
-
-            {item.salePrice && (
-
-              <p className="text-gray-500 line-through">
-
-                ₹
-                {item.price}
-
-              </p>
-
-            )}
-
-          </div>
-
-        </Link>
-
-      )
-    )}
-
-  </div>
-
-</section>
-{/* REVIEWS */}
-
-<section className="max-w-7xl mx-auto mt-32">
-
-  <div className="mb-16">
-
-    <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
-
-      Customer Feedback
-
-    </p>
-
-    <h2 className="text-5xl font-black">
-
-      Reviews
-
-    </h2>
-
-  </div>
-
-  {/* REVIEW FORM */}
-
-  <div className="bg-[#111] border border-white/10 rounded-[2rem] p-10 mb-16">
-
-    <h3 className="text-3xl font-bold mb-8">
-
-      Write a Review
-
-    </h3>
-
-    <input
-      type="text"
-      placeholder="Your Name"
-      value={userName}
-      onChange={(e) =>
-        setUserName(
-          e.target.value
-        )
-      }
-      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 mb-6 outline-none focus:border-[#d6c2a8]"
-    />
-
-    <select
-      value={rating}
-      onChange={(e) =>
-        setRating(
-          Number(
-            e.target.value
-          )
-        )
-      }
-      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 mb-6 outline-none focus:border-[#d6c2a8]"
-    >
-
-      <option value={5}>
-        5 Stars
-      </option>
-
-      <option value={4}>
-        4 Stars
-      </option>
-
-      <option value={3}>
-        3 Stars
-      </option>
-
-      <option value={2}>
-        2 Stars
-      </option>
-
-      <option value={1}>
-        1 Star
-      </option>
-
-    </select>
-
-    <textarea
-      placeholder="Write your review..."
-      value={reviewText}
-      onChange={(e) =>
-        setReviewText(
-          e.target.value
-        )
-      }
-      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-5 h-40 mb-6 outline-none focus:border-[#d6c2a8]"
-    />
-
-    <button
-      onClick={submitReview}
-      disabled={submitting}
-      className="bg-white text-black px-10 py-5 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
-    >
-
-      {submitting
-        ? "Submitting..."
-        : "Submit Review"}
-
-    </button>
-
-  </div>
-
-  {/* REVIEW LIST */}
-
-  <div className="space-y-8">
-
-    {reviews.map(
-      (
-        item: any,
-        index: number
-      ) => (
-
-        <div
-          key={index}
-          className="bg-[#111] border border-white/10 rounded-[2rem] p-8"
-        >
-
-          <div className="flex items-center justify-between mb-5">
-
-            <h3 className="text-2xl font-bold">
-
-              {item.userName}
-
-            </h3>
-
-            <div className="text-yellow-400 text-xl">
-
-              {"★".repeat(
-                item.rating
-              )}
-
-            </div>
-
-          </div>
-
-          <p className="text-gray-300 leading-8 text-lg">
-
-            {item.review}
-
-          </p>
+          </h2>
 
         </div>
 
-      )
-    )}
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-10">
 
-  </div>
+          {similarProducts.map(
+            (item: any) => (
 
-</section>
+              <Link
+                key={item.id}
+                href={`/products/${item.id}`}
+                className="group"
+              >
+
+                <div className="overflow-hidden rounded-[2rem] bg-[#111] mb-5">
+
+                  <img
+                    src={
+                      item.mainImage
+                    }
+                    alt={item.name}
+                    className="w-full h-[350px] object-cover group-hover:scale-105 transition duration-500"
+                  />
+
+                </div>
+
+                <p className="uppercase tracking-[0.25em] text-[#d6c2a8] text-xs mb-3">
+
+                  {item.category}
+
+                </p>
+
+                <h3 className="text-2xl font-semibold mb-3">
+
+                  {item.name}
+
+                </h3>
+
+                <p className="text-gray-400 line-clamp-2 mb-4">
+
+                  {
+                    item.shortDescription
+                  }
+
+                </p>
+
+                <div className="flex items-center gap-4">
+
+                  <p className="text-2xl font-bold">
+
+                    ₹
+                    {item.salePrice ||
+                      item.price}
+
+                  </p>
+
+                  {item.salePrice && (
+
+                    <p className="text-gray-500 line-through">
+
+                      ₹
+                      {item.price}
+
+                    </p>
+
+                  )}
+
+                </div>
+
+              </Link>
+
+            )
+          )}
+
+        </div>
+
+      </section>
+
+      {/* PRODUCT REVIEWS */}
+
+      <ProductReviews
+        productId={product.id}
+      />
+
     </main>
 
   );
