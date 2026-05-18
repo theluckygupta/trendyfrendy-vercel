@@ -6,7 +6,9 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
+import {
+  db,
+} from "@/lib/firebase";
 
 import {
   useEffect,
@@ -20,9 +22,11 @@ import {
 
 export default function EditProductPage() {
 
-  const params = useParams();
+  const params =
+    useParams();
 
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const [loading, setLoading] =
     useState(true);
@@ -55,8 +59,12 @@ export default function EditProductPage() {
       if (docSnap.exists()) {
 
         setProduct({
-          id: docSnap.id,
+
+          id:
+            docSnap.id,
+
           ...docSnap.data(),
+
         });
 
       }
@@ -72,90 +80,85 @@ export default function EditProductPage() {
   }
 
   async function handleImages(
-  e: React.ChangeEvent<HTMLInputElement>
-) {
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
 
-  const files = e.target.files;
+    const files =
+      e.target.files;
 
-  if (!files) return;
+    if (!files) return;
 
-  setSaving(true);
+    setSaving(true);
 
-  const uploadedUrls: string[] = [];
+    const uploadedUrls: string[] = [];
 
-  try {
+    try {
 
-    for (const file of Array.from(files)) {
+      for (const file of Array.from(files)) {
 
-      const reader =
-        new FileReader();
+        const formData =
+          new FormData();
 
-      const base64Promise =
-        new Promise<string>((resolve) => {
-
-          reader.onloadend = () => {
-
-            resolve(
-              reader.result as string
-            );
-
-          };
-
-        });
-
-      reader.readAsDataURL(file);
-
-      const base64 =
-        await base64Promise;
-
-      const response =
-        await fetch("/api/upload", {
-
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            file: base64,
-          }),
-
-        });
-
-      const data =
-        await response.json();
-
-      if (data?.url) {
-
-        uploadedUrls.push(
-          data.url
+        formData.append(
+          "file",
+          file
         );
+
+        formData.append(
+          "upload_preset",
+          "trendyfrenzy"
+        );
+
+        const response =
+          await fetch(
+            "https://api.cloudinary.com/v1_1/dk3unll8y/image/upload",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+        const uploadData =
+          await response.json();
+
+        if (
+          uploadData.secure_url
+        ) {
+
+          uploadedUrls.push(
+            uploadData.secure_url
+          );
+
+        }
 
       }
 
+      setProduct({
+
+        ...product,
+
+        mainImage:
+          product.mainImage ||
+          uploadedUrls[0],
+
+        images: [
+          ...(product.images || []),
+          ...uploadedUrls,
+        ],
+
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Upload failed");
+
     }
 
-    setProduct({
-      ...product,
-      mainImage:
-        uploadedUrls[0] || "",
-      images:
-        uploadedUrls,
-    });
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert("Upload failed");
+    setSaving(false);
 
   }
-
-  setSaving(false);
-
-}
 
   async function saveProduct() {
 
@@ -170,7 +173,9 @@ export default function EditProductPage() {
           String(params.id)
         ),
         {
-          name: product.name,
+
+          name:
+            product.name,
 
           shortDescription:
             product.shortDescription,
@@ -191,13 +196,14 @@ export default function EditProductPage() {
             product.stock,
 
           sizes:
-  product.sizes || [],  
+            product.sizes || [],
 
           mainImage:
             product.mainImage,
 
           images:
             product.images || [],
+
         }
       );
 
@@ -228,7 +234,9 @@ export default function EditProductPage() {
     return (
 
       <div className="p-10">
+
         Loading...
+
       </div>
 
     );
@@ -273,50 +281,90 @@ export default function EditProductPage() {
 
       </div>
 
-      {/* FORM */}
-
       <div className="space-y-6">
 
-        {/* IMAGE */}
+        {/* IMAGES */}
 
         <div className="bg-white border border-gray-200 rounded-3xl p-6">
 
-  <label className="block mb-4 font-semibold">
+          <label className="block mb-4 font-semibold">
 
-    Product Images
+            Product Images
 
-  </label>
+          </label>
 
-  <input
-    type="file"
-    multiple
-    accept="image/*"
-    onChange={handleImages}
-    className="mb-6"
-  />
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImages}
+            className="mb-6"
+          />
 
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-    {(product.images || []).map(
-      (
-        image: string,
-        index: number
-      ) => (
+            {(product.images || []).map(
+              (
+                image: string,
+                index: number
+              ) => (
 
-        <img
-          key={index}
-          src={image}
-          alt=""
-          className="w-full h-48 rounded-2xl object-cover border"
-        />
+                <div
+                  key={index}
+                  className="relative"
+                >
 
-      )
-    )}
+                  <img
+                    src={image}
+                    alt=""
+                    className="w-full h-48 rounded-2xl object-cover border"
+                  />
 
-  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
 
-</div>
-        {/* TITLE */}
+                      const updated =
+                        (
+                          product.images || []
+                        ).filter(
+                          (
+                            _: string,
+                            i: number
+                          ) =>
+                            i !== index
+                        );
+
+                      setProduct({
+
+                        ...product,
+
+                        images:
+                          updated,
+
+                        mainImage:
+                          updated[0] || "",
+
+                      });
+
+                    }}
+                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full"
+                  >
+
+                    ✕
+
+                  </button>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+        </div>
+
+        {/* NAME */}
 
         <div className="bg-white border border-gray-200 rounded-3xl p-6">
 
@@ -331,8 +379,12 @@ export default function EditProductPage() {
             value={product.name || ""}
             onChange={(e) =>
               setProduct({
+
                 ...product,
-                name: e.target.value,
+
+                name:
+                  e.target.value,
+
               })
             }
             className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
@@ -357,9 +409,12 @@ export default function EditProductPage() {
             }
             onChange={(e) =>
               setProduct({
+
                 ...product,
+
                 shortDescription:
                   e.target.value,
+
               })
             }
             className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none resize-none"
@@ -384,9 +439,12 @@ export default function EditProductPage() {
             }
             onChange={(e) =>
               setProduct({
+
                 ...product,
+
                 description:
                   e.target.value,
+
               })
             }
             className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none resize-none"
@@ -394,7 +452,7 @@ export default function EditProductPage() {
 
         </div>
 
-        {/* PRICING */}
+        {/* PRICES */}
 
         <div className="grid md:grid-cols-2 gap-6">
 
@@ -411,9 +469,12 @@ export default function EditProductPage() {
               value={product.price || ""}
               onChange={(e) =>
                 setProduct({
+
                   ...product,
+
                   price:
                     e.target.value,
+
                 })
               }
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
@@ -436,9 +497,12 @@ export default function EditProductPage() {
               }
               onChange={(e) =>
                 setProduct({
+
                   ...product,
+
                   salePrice:
                     e.target.value,
+
                 })
               }
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
@@ -448,73 +512,100 @@ export default function EditProductPage() {
 
         </div>
 
-        {/* CATEGORY + STOCK */}
-<div className="bg-white border border-gray-200 rounded-3xl p-6">
+        {/* SIZES */}
 
-  <label className="block mb-4 font-semibold">
+        <div className="bg-white border border-gray-200 rounded-3xl p-6">
 
-    Available Sizes
+          <label className="block mb-4 font-semibold">
 
-  </label>
+            Available Sizes
 
-  <div className="flex gap-3 flex-wrap">
+          </label>
 
-    {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
+          <div className="flex gap-3 flex-wrap">
 
-      <button
-        key={size}
-        type="button"
-        onClick={() => {
+            {[
+              "XS",
+              "S",
+              "M",
+              "L",
+              "XL",
+              "2XL",
+              "3XL",
+              "4XL",
+              "5XL",
+              "6XL",
+              "7XL",
+              "8XL",
+              "9XL",
+              "10XL",
+            ].map((size) => (
 
-          const current =
-            product.sizes || [];
+              <button
+                key={size}
+                type="button"
+                onClick={() => {
 
-          if (
-            current.includes(size)
-          ) {
+                  const current =
+                    product.sizes || [];
 
-            setProduct({
-              ...product,
-              sizes:
-                current.filter(
+                  if (
+                    current.includes(
+                      size
+                    )
+                  ) {
+
+                    setProduct({
+
+                      ...product,
+
+                      sizes:
+                        current.filter(
+                          (
+                            s: string
+                          ) =>
+                            s !== size
+                        ),
+
+                    });
+
+                  } else {
+
+                    setProduct({
+
+                      ...product,
+
+                      sizes: [
+                        ...current,
+                        size,
+                      ],
+
+                    });
+
+                  }
+
+                }}
+                className={`px-5 py-3 rounded-xl border transition ${
                   (
-                    s: string
-                  ) =>
-                    s !== size
-                ),
-            });
+                    product.sizes || []
+                  ).includes(size)
+                    ? "bg-black text-white border-black"
+                    : "bg-white border-gray-300"
+                }`}
+              >
 
-          } else {
+                {size}
 
-            setProduct({
-              ...product,
-              sizes: [
-                ...current,
-                size,
-              ],
-            });
+              </button>
 
-          }
+            ))}
 
-        }}
-        className={`px-5 py-3 rounded-xl border transition ${
-          (
-            product.sizes || []
-          ).includes(size)
-            ? "bg-black text-white border-black"
-            : "bg-white border-gray-300"
-        }`}
-      >
+          </div>
 
-        {size}
+        </div>
 
-      </button>
+        {/* CATEGORY + STOCK */}
 
-    ))}
-
-  </div>
-
-</div>
         <div className="grid md:grid-cols-2 gap-6">
 
           <div className="bg-white border border-gray-200 rounded-3xl p-6">
@@ -532,9 +623,12 @@ export default function EditProductPage() {
               }
               onChange={(e) =>
                 setProduct({
+
                   ...product,
+
                   category:
                     e.target.value,
+
                 })
               }
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"
@@ -557,9 +651,12 @@ export default function EditProductPage() {
               }
               onChange={(e) =>
                 setProduct({
+
                   ...product,
+
                   stock:
                     e.target.value,
+
                 })
               }
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none"

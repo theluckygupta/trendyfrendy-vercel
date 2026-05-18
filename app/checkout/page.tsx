@@ -1,164 +1,395 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+
+import Navbar from "@/components/Navbar";
+
+import {
+  useCart,
+} from "@/context/CartContext";
+
+import {
+  useAuth,
+} from "@/context/AuthContext";
 
 export default function CheckoutPage() {
 
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const {
+    cartItems,
+    setCartItems,
+  } = useCart();
 
-  useEffect(() => {
+  const {
+    user,
+    login,
+    logout,
+  } = useAuth();
 
-    const savedCart = localStorage.getItem("cart");
+  const total =
+    cartItems.reduce(
 
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+      (
+        total: number,
+        item: any
+      ) => {
 
-  }, []);
+        const numericPrice =
+          Number(
+            item.salePrice ||
+            item.price
+          );
 
-  const total = cartItems.reduce((total, item) => {
+        return (
+          total +
+          numericPrice *
+            (item.quantity || 1)
+        );
 
-    const numericPrice = Number(
-      item.price.replace("₹", "")
+      },
+
+      0
+
     );
 
-    return total + numericPrice;
+  async function handleCheckout() {
 
-  }, 0);
+    if (!user) {
 
-  const whatsappMessage = encodeURIComponent(
+      try {
 
-    `Hello TrendyFrenzy,%0A%0AI want to order:%0A${cartItems
-      .map(
-        (item) =>
-          `• ${item.name} - ${item.price}`
-      )
-      .join("%0A")}%0A%0ATotal: ₹${total}`
+        await login();
 
-  );
+        return;
+
+      } catch (error: any) {
+
+        alert(
+          error.message
+        );
+
+        console.log(error);
+
+        return;
+
+      }
+
+    }
+
+    const orderText = `🛍️ New Order - TrendyFrenzy
+
+${cartItems.map(
+  (item: any) =>
+
+`• ${item.name}
+₹${item.salePrice || item.price}`
+).join("\n\n")}
+
+----------------------------
+
+Total: ₹${total}
+`;
+
+    window.open(
+
+      `https://wa.me/917019650441?text=${encodeURIComponent(orderText)}`,
+
+      "_blank"
+
+    );
+
+  }
 
   return (
 
-    <main className="min-h-screen bg-black text-white px-6 py-20">
+    <>
 
-      {/* NAVBAR */}
-      <nav className="flex justify-between items-center mb-20">
+      <Navbar
+        cartCount={cartItems.length}
+        onCartOpen={() => {}}
+      />
 
-        <Link
-          href="/"
-          className="text-2xl font-bold tracking-[0.2em] uppercase text-white"
-        >
-          TrendyFrenzy
-        </Link>
+      <main className="min-h-screen bg-[#0a0a0a] text-white px-6 py-24">
 
-        <Link
-          href="/"
-          className="border border-white/20 text-white px-6 py-3 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
-        >
-          Continue Shopping
-        </Link>
+        <div className="max-w-7xl mx-auto">
 
-      </nav>
+          {/* HEADER */}
 
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20">
+          <div className="flex items-center justify-between mb-16">
 
-        {/* FORM */}
-        <div>
+            <div>
 
-          <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
-            Checkout
-          </p>
+              <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
 
-          <h1 className="text-5xl font-bold mb-10">
-            Customer Details
-          </h1>
+                Checkout
 
-          <div className="space-y-6">
+              </p>
 
-            <input
-              type="text"
-              placeholder="Full Name"
-              className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
-            />
+              <h1 className="text-5xl md:text-7xl font-black">
 
-            <input
-              type="text"
-              placeholder="Phone Number"
-              className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
-            />
+                Your Cart
 
-            <textarea
-              placeholder="Shipping Address"
-              rows={5}
-              className="w-full bg-[#111] border border-white/10 rounded-2xl px-6 py-5 outline-none focus:border-[#d6c2a8]"
-            />
+              </h1>
+
+            </div>
+
+            <Link
+              href="/"
+              className="border border-white/10 px-6 py-3 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
+            >
+
+              Continue Shopping
+
+            </Link>
 
           </div>
 
-        </div>
+          {/* EMPTY */}
 
-        {/* ORDER SUMMARY */}
-        <div className="bg-[#111] rounded-[2rem] p-10 h-fit">
+          {cartItems.length === 0 && (
 
-          <h2 className="text-3xl font-bold mb-10">
-            Order Summary
-          </h2>
+            <div className="text-center py-32">
 
-          <div className="space-y-6">
+              <h2 className="text-4xl font-bold mb-6">
 
-            {cartItems.map((item, index) => (
+                Your cart is empty
 
-              <div
-                key={index}
-                className="flex justify-between border-b border-white/10 pb-4"
+              </h2>
+
+              <Link
+                href="/"
+                className="inline-block bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
               >
 
-                <div>
+                Shop Now
 
-                  <h3 className="font-semibold">
-                    {item.name}
-                  </h3>
+              </Link>
 
-                  <p className="text-gray-400 text-sm mt-1">
-                    Premium Collection
-                  </p>
+            </div>
 
-                </div>
+          )}
 
-                <p className="text-[#d6c2a8]">
-                  {item.price}
-                </p>
+          {/* CART */}
+
+          {cartItems.length > 0 && (
+
+            <div className="grid lg:grid-cols-[1fr_420px] gap-12">
+
+              {/* LEFT */}
+
+              <div className="space-y-8">
+
+                {cartItems.map(
+
+                  (
+                    item: any,
+                    index: number
+                  ) => (
+
+                    <div
+                      key={index}
+                      className="bg-[#111] border border-white/10 rounded-[2rem] p-6 flex gap-6"
+                    >
+
+                      <img
+                        src={
+                          item.mainImage ||
+                          item.image
+                        }
+                        alt={item.name}
+                        className="w-36 h-44 object-cover rounded-2xl"
+                      />
+
+                      <div className="flex-1 flex flex-col justify-between">
+
+                        <div>
+
+                          <p className="uppercase tracking-[0.2em] text-[#d6c2a8] text-xs mb-3">
+
+                            {item.category ||
+                              "Luxury"}
+
+                          </p>
+
+                          <h2 className="text-3xl font-bold mb-4">
+
+                            {item.name}
+
+                          </h2>
+
+                          <p className="text-gray-400 leading-7">
+
+                            {item.shortDescription}
+
+                          </p>
+
+                        </div>
+
+                        <div className="flex items-center justify-between mt-6">
+
+                          <div className="flex items-center gap-4">
+
+                            <p className="text-3xl font-bold">
+
+                              ₹
+                              {item.salePrice ||
+                                item.price}
+
+                            </p>
+
+                            {item.salePrice && (
+
+                              <p className="text-gray-500 line-through">
+
+                                ₹
+                                {item.price}
+
+                              </p>
+
+                            )}
+
+                          </div>
+
+                          <button
+                            onClick={() =>
+
+                              setCartItems(
+                                (
+                                  prev: any[]
+                                ) =>
+
+                                  prev.filter(
+                                    (
+                                      _: any,
+                                      i: number
+                                    ) =>
+
+                                      i !== index
+                                  )
+                              )
+
+                            }
+                            className="text-red-400 hover:text-red-300 transition"
+                          >
+
+                            Remove
+
+                          </button>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  )
+
+                )}
 
               </div>
 
-            ))}
+              {/* RIGHT */}
 
-          </div>
+              <div className="bg-[#111] border border-white/10 rounded-[2rem] p-8 h-fit sticky top-24">
 
-          <div className="flex justify-between items-center mt-10 text-2xl font-bold">
+                <h2 className="text-4xl font-bold mb-10">
 
-            <span>Total</span>
+                  Order Summary
 
-            <span className="text-[#d6c2a8]">
-              ₹{total}
-            </span>
+                </h2>
 
-          </div>
+                <div className="space-y-5 mb-10">
 
-          <a
-            href={`https://wa.me/917019650441?text=${whatsappMessage}`}
-            target="_blank"
-            className="block mt-10 bg-white text-black text-center py-5 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
-          >
-            Place Order on WhatsApp
-          </a>
+                  <div className="flex justify-between text-lg">
+
+                    <span className="text-gray-400">
+
+                      Products
+
+                    </span>
+
+                    <span>
+
+                      {cartItems.length}
+
+                    </span>
+
+                  </div>
+
+                  <div className="flex justify-between text-lg">
+
+                    <span className="text-gray-400">
+
+                      Shipping
+
+                    </span>
+
+                    <span>
+
+                      Free
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div className="border-t border-white/10 pt-8 mb-10">
+
+                  <div className="flex justify-between items-center">
+
+                    <span className="text-2xl font-semibold">
+
+                      Total
+
+                    </span>
+
+                    <span className="text-4xl font-black text-[#d6c2a8]">
+
+                      ₹
+                      {total.toLocaleString()}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-white text-black py-5 rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition"
+                >
+
+                  {user
+                    ? "Proceed To Checkout"
+                    : "Login With Google"}
+
+                </button>
+
+                {user && (
+
+                  <button
+                    onClick={logout}
+                    className="mt-4 w-full border border-white/10 py-5 rounded-full text-lg font-semibold hover:border-red-500 hover:text-red-400 transition"
+                  >
+
+                    Logout
+
+                  </button>
+
+                )}
+
+              </div>
+
+            </div>
+
+          )}
 
         </div>
 
-      </div>
+      </main>
 
-    </main>
+    </>
 
   );
+
 }

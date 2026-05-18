@@ -9,6 +9,8 @@ import {
 
 import ProductClient from "@/app/components/ProductClient";
 
+import Navbar from "@/components/Navbar";
+
 export async function generateMetadata({
   params,
 }: {
@@ -31,8 +33,10 @@ export async function generateMetadata({
     if (!docSnap.exists()) {
 
       return {
+
         title:
           "Product Not Found | TrendyFrenzy",
+
       };
 
     }
@@ -47,7 +51,8 @@ export async function generateMetadata({
 
     return {
 
-      title: `${product.name} | TrendyFrenzy`,
+      title:
+        `${product.name} | TrendyFrenzy`,
 
       description:
         product.shortDescription ||
@@ -55,14 +60,16 @@ export async function generateMetadata({
 
       openGraph: {
 
-        title: product.name,
+        title:
+          product.name,
 
         description:
           product.shortDescription,
 
         images: [image],
 
-        type: "website",
+        type:
+          "website",
 
       },
 
@@ -100,6 +107,20 @@ export async function generateMetadata({
 
 export default function ProductPage() {
 
-  return <ProductClient />;
+  return (
+
+    <>
+
+      <Navbar />
+
+      <div className="pt-24">
+
+        <ProductClient />
+
+      </div>
+
+    </>
+
+  );
 
 }

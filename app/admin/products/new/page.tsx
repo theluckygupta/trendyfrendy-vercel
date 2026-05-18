@@ -218,7 +218,7 @@ if (
           </h1>
 
           <p className="text-gray-500">
-            Shopify Style Product Creation
+            Product Creation
           </p>
 
         </div>
@@ -360,6 +360,14 @@ if (
                     "L",
                     "XL",
                     "XXL",
+                    "3XL",
+                    "4XL",
+                    "5XL",
+                    "6XL",
+                    "7XL",
+                    "8XL",
+                    "9XL",
+                    "10XL",
                   ].map((item) => (
 
                     <button
