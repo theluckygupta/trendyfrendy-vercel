@@ -103,10 +103,9 @@ Total: ₹${total}
 
     <>
 
-      <Navbar
-        cartCount={cartItems.length}
-        onCartOpen={() => {}}
-      />
+     <Navbar
+  cartCount={cartItems.length}
+/>
 
       <main className="min-h-screen bg-[#0a0a0a] text-white px-6 py-24">
 
