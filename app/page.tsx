@@ -133,14 +133,10 @@ export default function Home() {
         {/* NAVBAR */}
 
         <Navbar
-          cartCount={
-            cartItems.length
-          }
-          onCartOpen={() =>
-            setCartOpen(true)
-          }
-        />
-
+  cartCount={
+    cartItems.length
+  }
+/>
         {/* HERO */}
 
         <Hero />
