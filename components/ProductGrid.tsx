@@ -16,11 +16,19 @@ import {
   db,
 } from "@/lib/firebase";
 
+type Props = {
+  products: any[];
+  setSelectedProduct: (product: any) => void;
+  setCartItems: any;
+  setCartOpen: (open: boolean) => void;
+};
+
 export default function ProductGrid({
   products,
-}: {
-  products: any[];
-}) {
+  setSelectedProduct,
+  setCartItems,
+  setCartOpen,
+}: Props) {
 
   const [reviewStats, setReviewStats] =
     useState<any>({});
