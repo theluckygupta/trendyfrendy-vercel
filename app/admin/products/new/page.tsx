@@ -12,6 +12,8 @@ import {
 } from "@/lib/firebase";
 
 export default function NewProductPage() {
+  const [productCode, setProductCode] =
+  useState("");
 
   const [title, setTitle] =
     useState("");
@@ -119,8 +121,8 @@ export default function NewProductPage() {
       const productData = {
 
         name:
-          title,
-
+  `TR${productCode}-${title}`,
+  
         shortDescription,
 
         description,
@@ -232,6 +234,37 @@ export default function NewProductPage() {
           {/* TITLE */}
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="mb-6">
+
+  <label className="block mb-3 font-medium">
+
+    Product Code
+
+  </label>
+
+  <div className="flex items-center">
+
+    <div className="bg-black text-white px-5 py-3 rounded-l-xl border border-black">
+
+      TR
+
+    </div>
+
+    <input
+      type="text"
+      value={productCode}
+      onChange={(e) =>
+        setProductCode(
+          e.target.value
+        )
+      }
+      placeholder="2008"
+      className="w-full border border-gray-300 rounded-r-xl px-4 py-3 outline-none"
+    />
+
+  </div>
+
+</div>
 
             <label className="block mb-3 font-medium">
 

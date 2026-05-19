@@ -1,179 +1,233 @@
 "use client";
-import {
-  useWishlist,
-} from "@/context/WishlistContext";
+
 import Link from "next/link";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  collection,
+  getDocs,
+} from "firebase/firestore";
+
+import {
+  db,
+} from "@/lib/firebase";
 
 export default function ProductGrid({
   products,
-  setSelectedProduct,
-  setCartItems,
-  setCartOpen,
-}: any) {
-const {
-  wishlistItems,
-  toggleWishlist,
-} = useWishlist();
+}: {
+  products: any[];
+}) {
+
+  const [reviewStats, setReviewStats] =
+    useState<any>({});
+
+  useEffect(() => {
+
+    async function fetchReviews() {
+
+      const snapshot =
+        await getDocs(
+          collection(
+            db,
+            "reviews"
+          )
+        );
+
+      const grouped: any = {};
+
+      snapshot.docs.forEach(
+        (doc) => {
+
+          const data: any =
+            doc.data();
+
+          if (
+            !grouped[
+              data.productId
+            ]
+          ) {
+
+            grouped[
+              data.productId
+            ] = {
+
+              total: 0,
+
+              count: 0,
+
+            };
+
+          }
+
+          grouped[
+            data.productId
+          ].total +=
+            data.rating;
+
+          grouped[
+            data.productId
+          ].count += 1;
+
+        }
+      );
+
+      setReviewStats(
+        grouped
+      );
+
+    }
+
+    fetchReviews();
+
+  }, []);
+
   return (
 
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
 
       {products.map(
-        (product: any) => (
+        (product: any) => {
 
-          <div
-            key={product.id}
-            className="group bg-[#111] border border-white/10 rounded-[2rem] overflow-hidden hover:border-[#d6c2a8] transition duration-500"
-          >
+          const stats =
+            reviewStats[
+              product.id
+            ];
 
-            {/* IMAGE */}
+          const average =
+            stats
 
-            <div className="relative overflow-hidden">
-              <button
+              ? (
+                  stats.total /
+                  stats.count
+                ).toFixed(1)
 
-  onClick={() =>
-    toggleWishlist(
-      product
-    )
-  }
+              : null;
 
-  className="absolute top-5 left-5 z-20 w-12 h-12 rounded-full bg-black/70 backdrop-blur flex items-center justify-center text-2xl hover:scale-110 transition"
->
+          return (
 
-  {wishlistItems.find(
-    (
-      item: any
-    ) =>
+            <Link
+              key={product.id}
+              href={`/products/${product.id}`}
+              className="group"
+            >
 
-      item.id ===
-      product.id
-  )
+              {/* IMAGE */}
 
-    ? "❤️"
+              <div className="relative overflow-hidden rounded-[2rem] bg-[#111]">
 
-    : "🤍"}
+                <img
+                  src={
+                    product.mainImage
+                  }
+                  alt={product.name}
+                  className="w-full h-[300px] md:h-[420px] object-cover group-hover:scale-105 transition duration-500"
+                />
 
-</button>
+                {/* RATING */}
 
-              <img
-                src={
-                  product.mainImage ||
-                  product.image
-                }
-                alt={product.name}
-                className="w-full h-[500px] object-cover group-hover:scale-105 transition duration-700"
-              />
+                {average && (
 
-              <button
-                onClick={() =>
-                  setSelectedProduct(
-                    product
-                  )
-                }
-                className="absolute top-5 right-5 bg-black/70 backdrop-blur px-5 py-2 rounded-full text-sm hover:bg-white hover:text-black transition"
-              >
+                  <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md px-3 py-2 rounded-xl flex items-center gap-2 shadow-lg">
 
-                Quick View
+                    <span className="font-bold text-black text-sm">
 
-              </button>
+                      {average}
 
-            </div>
+                    </span>
 
-            {/* CONTENT */}
+                    <span className="text-green-600">
 
-            <div className="p-8">
+                      ★
 
-              <p className="uppercase tracking-[0.25em] text-[#d6c2a8] text-xs mb-3">
+                    </span>
 
-                {product.category ||
-                  "Luxury"}
+                    <span className="text-gray-500 text-sm">
 
-              </p>
+                      |
+                    </span>
 
-              <h3 className="text-3xl font-bold mb-4">
+                    <span className="text-gray-700 text-sm">
 
-                {product.name}
+                      {stats.count}
 
-              </h3>
+                    </span>
 
-              <p className="text-gray-400 leading-7 mb-6 line-clamp-2">
-
-                {product.shortDescription ||
-                  product.description}
-
-              </p>
-
-              {/* PRICE */}
-
-              <div className="flex items-center gap-4 mb-8">
-
-                <p className="text-3xl font-bold">
-
-                  ₹
-                  {product.salePrice ||
-                    product.price}
-
-                </p>
-
-                {product.salePrice && (
-
-                  <p className="text-gray-500 line-through text-xl">
-
-                    ₹
-                    {product.price}
-
-                  </p>
+                  </div>
 
                 )}
 
               </div>
 
-              {/* BUTTONS */}
+              {/* CONTENT */}
 
-              <div className="flex gap-4">
+              <div className="mt-5">
 
-                <Link
-                  href={`/products/${product.id}`}
-                  className="flex-1 text-center border border-white/10 py-4 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
-                >
+                <h3 className="text-2xl font-semibold mb-2 line-clamp-1">
 
-                  View Product
+                  {product.name}
 
-                </Link>
+                </h3>
 
-                <button
-                  onClick={() => {
+                <p className="text-gray-400 line-clamp-2 mb-4">
 
-                    setCartItems(
-                      (prev: any[]) => [
+                  {
+                    product.shortDescription
+                  }
 
-                        ...prev,
+                </p>
 
-                        {
-                          ...product,
-                          quantity: 1,
-                        },
+                <div className="flex items-center gap-4 flex-wrap">
 
-                      ]
-                    );
+                  <p className="text-2xl font-bold">
 
-                    setCartOpen(true);
+                    ₹
+                    {product.salePrice ||
+                      product.price}
 
-                  }}
-                  className="flex-1 bg-white text-black py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
-                >
+                  </p>
 
-                  Add to Cart
+                  {product.salePrice && (
 
-                </button>
+                    <>
+                      <p className="text-gray-500 line-through">
+
+                        ₹
+                        {product.price}
+
+                      </p>
+
+                      <p className="text-[#ff905a]">
+
+                        (
+                        {Math.round(
+
+                          ((product.price -
+                            product.salePrice) /
+
+                            product.price) *
+
+                            100
+                        )}
+                        % OFF)
+
+                      </p>
+                    </>
+
+                  )}
+
+                </div>
 
               </div>
 
-            </div>
+            </Link>
 
-          </div>
+          );
 
-        )
+        }
       )}
 
     </div>

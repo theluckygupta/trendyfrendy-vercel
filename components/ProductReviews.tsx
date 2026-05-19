@@ -18,20 +18,26 @@ import {
   db,
 } from "@/lib/firebase";
 
+import {
+  useAuth,
+} from "@/context/AuthContext";
+
 export default function ProductReviews({
   productId,
 }: {
   productId: string;
 }) {
 
+  const {
+    user,
+    loginWithGoogle,
+  } = useAuth();
+
   const [reviews, setReviews] =
     useState<any[]>([]);
 
   const [review, setReview] =
     useState("");
-
-    const [name, setName] =
-  useState("");
 
   const [rating, setRating] =
     useState(5);
@@ -97,6 +103,16 @@ export default function ProductReviews({
 
   async function submitReview() {
 
+    if (!user) {
+
+      alert(
+        "Login Required"
+      );
+
+      return;
+
+    }
+
     if (!review) return;
 
     try {
@@ -118,7 +134,14 @@ export default function ProductReviews({
 
           rating,
 
-          name,
+          name:
+            user.displayName,
+
+          userEmail:
+            user.email,
+
+          userPhoto:
+            user.photoURL,
 
           createdAt:
             Date.now(),
@@ -203,7 +226,9 @@ export default function ProductReviews({
 
           <p className="text-gray-400 mt-2">
 
-            {reviews.length} Reviews
+            {reviews.length}
+            {" "}
+            Reviews
 
           </p>
 
@@ -211,7 +236,7 @@ export default function ProductReviews({
 
       </div>
 
-      {/* WRITE REVIEW */}
+      {/* REVIEW FORM */}
 
       <div className="bg-[#111] border border-white/10 rounded-[2rem] p-8 mb-16">
 
@@ -220,17 +245,63 @@ export default function ProductReviews({
           Write A Review
 
         </h3>
-<input
-  type="text"
-  value={name}
-  onChange={(e) =>
-    setName(
-      e.target.value
-    )
-  }
-  placeholder="Your Name"
-  className="w-full bg-black border border-white/10 rounded-2xl p-5 outline-none mb-8"
-/>
+
+        {!user && (
+
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-8">
+
+            <p className="text-red-400 mb-5">
+
+              Login Required To Write Review
+
+            </p>
+
+            <button
+              onClick={loginWithGoogle}
+              className="bg-white text-black px-6 py-3 rounded-full font-semibold"
+            >
+
+              Login With Google
+
+            </button>
+
+          </div>
+
+        )}
+
+        {user && (
+
+          <div className="flex items-center gap-4 mb-8">
+
+            <img
+              src={
+                user.photoURL ||
+                "/user.png"
+              }
+              alt=""
+              className="w-14 h-14 rounded-full object-cover"
+            />
+
+            <div>
+
+              <h4 className="font-semibold text-lg">
+
+                {user.displayName}
+
+              </h4>
+
+              <p className="text-gray-400 text-sm">
+
+                {user.email}
+
+              </p>
+
+            </div>
+
+          </div>
+
+        )}
+
         {/* STARS */}
 
         <div className="flex gap-3 text-5xl mb-8">
@@ -274,8 +345,10 @@ export default function ProductReviews({
 
         <button
           onClick={submitReview}
-          disabled={loading}
-          className="mt-6 bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
+          disabled={
+            loading || !user
+          }
+          className="mt-6 bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition disabled:opacity-50"
         >
 
           {loading
@@ -300,43 +373,62 @@ export default function ProductReviews({
               className="bg-[#111] border border-white/10 rounded-[2rem] p-8"
             >
 
-              <div className="flex items-center gap-2 text-3xl mb-5">
+              <div className="flex items-center justify-between mb-6">
 
-                {[1, 2, 3, 4, 5].map(
-                  (star) => (
+                <div className="flex items-center gap-4">
 
-                    <span
-                      key={star}
-                    >
+                  <img
+                    src={
+                      item.userPhoto ||
+                      "/user.png"
+                    }
+                    alt=""
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
 
-                      {star <=
-                      item.rating
+                  <div>
 
-                        ? "⭐"
+                    <h3 className="text-2xl font-bold">
 
-                        : "☆"}
+                      {item.name}
+
+                    </h3>
+
+                    <span className="text-green-400 text-sm">
+
+                      Verified Buyer
 
                     </span>
 
-                  )
-                )}
+                  </div>
+
+                </div>
+
+                <div className="flex items-center gap-1 text-3xl">
+
+                  {[1, 2, 3, 4, 5].map(
+                    (star) => (
+
+                      <span
+                        key={star}
+                      >
+
+                        {star <=
+                        item.rating
+
+                          ? "⭐"
+
+                          : "☆"}
+
+                      </span>
+
+                    )
+                  )}
+
+                </div>
 
               </div>
-<div className="flex items-center justify-between mb-4">
 
-  <h3 className="text-2xl font-bold">
-
-    {item.name || "Anonymous"}
-
-  </h3>
-
-  <span className="text-green-400 text-sm">
-
-    Verified
-
-  </span>
-
-</div>
               <p className="text-gray-300 text-lg leading-8">
 
                 {item.review}
