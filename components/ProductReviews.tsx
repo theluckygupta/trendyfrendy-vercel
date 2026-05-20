@@ -46,54 +46,31 @@ export default function ProductReviews({
     useState(false);
 
   async function fetchReviews() {
+  try {
+    const snapshot = await getDocs(
+      collection(db, "reviews")
+    );
 
-    try {
+    const data = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .filter(
+        (review: any) =>
+          review.productId?.toString() ===
+          productId?.toString()
+      )
+      .sort(
+        (a: any, b: any) =>
+          b.createdAt - a.createdAt
+      );
 
-      const q =
-        query(
-
-          collection(
-            db,
-            "reviews"
-          ),
-
-          where(
-            "productId",
-            "==",
-            productId
-          ),
-
-          orderBy(
-            "createdAt",
-            "desc"
-          )
-
-        );
-
-      const snapshot =
-        await getDocs(q);
-
-      const data =
-        snapshot.docs.map(
-          (doc) => ({
-
-            id:
-              doc.id,
-
-            ...doc.data(),
-
-          })
-        );
-
-      setReviews(data);
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-
+    setReviews(data);
+  } catch (error) {
+    console.log(error);
   }
+}
 
   useEffect(() => {
 
