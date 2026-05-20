@@ -21,7 +21,7 @@ export default async function ProductPage({
       <Navbar cartCount={0} />
 
       <div className="pt-24 bg-[#0a0a0a]">
-
+c
         <ProductClient
           productId={id}
         />

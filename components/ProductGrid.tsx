@@ -30,6 +30,9 @@ export default function ProductGrid({
   setCartOpen,
 }: Props) {
 
+  const [likedItems, setLikedItems] = useState<{ [key: string]: boolean }>({});
+
+
   const [reviewStats, setReviewStats] =
     useState<any>({});
 
@@ -183,13 +186,20 @@ export default function ProductGrid({
 
   {/* WISHLIST BUTTON */}
 
-  <button
-    className="absolute bottom-4 right-4 bg-white text-black px-5 py-3 rounded-full font-semibold opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition duration-300 z-20 shadow-xl"
-  >
+ <button
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    ♡ Wishlist
-
-  </button>
+    setLikedItems((prev) => ({
+      ...prev,
+      [product.id]: !prev[product.id],
+    }));
+  }}
+  className="absolute bottom-4 right-4 bg-white text-black px-5 py-3 rounded-full font-semibold opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition duration-300 z-20 shadow-xl"
+>
+  {likedItems[product.id] ? "❤️ Wishlisted" : "♡ Wishlist"}
+</button>
 
   {/* DOTS */}
 

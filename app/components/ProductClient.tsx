@@ -3,6 +3,8 @@
 import Link from "next/link";
 
 import ProductReviews from "@/components/ProductReviews";
+import { useWishlist } from "@/context/WishlistContext";
+
 
 import {
   doc,
@@ -25,6 +27,8 @@ export default function ProductClient({
 }: {
   productId: string;
 }) {
+
+  const [liked, setLiked] = useState(false);
 
   const [product, setProduct] =
     useState<any>(null);
@@ -419,11 +423,14 @@ export default function ProductClient({
 
             </a>
 
-            <button className="bg-black text-white hover:bg-white hover:text-black px-10 border border-white/30 rounded-md font-bold transition">
-
-              ♡ WISHLIST
-
-            </button>
+<button
+  onClick={() => {
+    setLiked(!liked);
+  }}
+  className="px-8 py-4 rounded-full border border-white/10 hover:border-[#d6c2a8] transition"
+>
+  {liked ? "❤️ Wishlisted" : "♡ Wishlist"}
+</button>
 
           </div>
 

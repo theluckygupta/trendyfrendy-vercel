@@ -1,5 +1,8 @@
 "use client";
 
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
+
 import {
   createContext,
   useContext,
@@ -7,8 +10,17 @@ import {
   useState,
 } from "react";
 
-const WishlistContext =
-  createContext<any>(null);
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+
+const WishlistContext = createContext<any>(null);
 
 export function WishlistProvider({
   children,
@@ -16,120 +28,106 @@ export function WishlistProvider({
   children: React.ReactNode;
 }) {
 
-  const [wishlistItems, setWishlistItems] =
-  useState<any[]>([]);
+  const { user, loginWithGoogle } = useAuth();
 
-const [mounted, setMounted] =
-  useState(false);
+  const [wishlistItems, setWishlistItems] = useState<any[]>([]);
 
+  // ✅ LOAD WISHLIST FROM FIREBASE
   useEffect(() => {
+    async function fetchWishlist() {
+      if (!user) {
+        setWishlistItems([]);
+        return;
+      }
 
-  const savedWishlist =
-    localStorage.getItem(
-      "wishlist"
-    );
-
-  if (savedWishlist) {
-
-    setWishlistItems(
-      JSON.parse(
-        savedWishlist
-      )
-    );
-
-  }
-
-  setMounted(true);
-
-}, []);
-
-  useEffect(() => {
-
-  if (!mounted) return;
-
-  localStorage.setItem(
-    "wishlist",
-    JSON.stringify(
-      wishlistItems
-    )
-  );
-
-}, [
-  wishlistItems,
-  mounted,
-]);
-  function toggleWishlist(
-    product: any
-  ) {
-
-    const exists =
-      wishlistItems.find(
-        (
-          item: any
-        ) =>
-
-          item.id ===
-          product.id
+      const q = query(
+        collection(db, "wishlist"),
+        where("userId", "==", user.uid)
       );
 
-    if (exists) {
+      const snapshot = await getDocs(q);
 
-      setWishlistItems(
-        wishlistItems.filter(
-          (
-            item: any
-          ) =>
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-            item.id !==
-            product.id
-        )
-      );
-
-      alert(
-  "Removed from Wishlist 💔"
-);
-
-      return false;
-
+      setWishlistItems(data);
     }
 
-    setWishlistItems([
-      ...wishlistItems,
-      product,
-    ]);
+    fetchWishlist();
+  }, [user]);
 
-    alert(
-  "Favorited ❤️"
-);
+  // ✅ TOGGLE WISHLIST (CORRECT PLACE)
+  async function toggleWishlist(product: any) {
 
-    return true;
+    // 🔒 FORCE LOGIN
+    if (!user) {
+      alert("Login required");
+      await loginWithGoogle();
 
+      setTimeout(() => {
+        toggleWishlist(product); // retry
+      }, 500);
+
+      return;
+    }
+
+    const q = query(
+      collection(db, "wishlist"),
+      where("userId", "==", user.uid),
+      where("productId", "==", product.id)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      // ❌ REMOVE
+      snapshot.forEach(async (docItem) => {
+        await deleteDoc(doc(db, "wishlist", docItem.id));
+      });
+
+      setWishlistItems((prev) =>
+        prev.filter((item: any) => item.productId !== product.id)
+      );
+
+      alert("Removed from Wishlist 💔");
+      return false;
+    } else {
+      // ✅ ADD
+      const docRef = await addDoc(collection(db, "wishlist"), {
+        userId: user.uid,
+        productId: product.id,
+        productData: product,
+        createdAt: Date.now(),
+      });
+
+      setWishlistItems((prev) => [
+        ...prev,
+        {
+          id: docRef.id,
+          productId: product.id,
+          productData: product,
+        },
+      ]);
+
+      alert("Added to Wishlist ❤️");
+      return true;
+    }
   }
 
   return (
-
     <WishlistContext.Provider
       value={{
-
         wishlistItems,
-
         toggleWishlist,
-
       }}
     >
-
       {children}
-
     </WishlistContext.Provider>
-
   );
-
 }
 
 export function useWishlist() {
-
-  return useContext(
-    WishlistContext
-  );
-
+  return useContext(WishlistContext);
 }

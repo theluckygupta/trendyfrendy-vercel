@@ -1,4 +1,5 @@
 "use client";
+import { Star } from "lucide-react";
 
 import {
   useEffect,
@@ -283,28 +284,20 @@ export default function ProductReviews({
 
         <div className="flex gap-3 text-5xl mb-8">
 
-          {[1, 2, 3, 4, 5].map(
-            (star) => (
-
-              <button
-                key={star}
-                type="button"
-                onClick={() =>
-                  setRating(star)
-                }
-                className="hover:scale-110 transition"
-              >
-
-                {star <= rating
-
-                  ? "⭐"
-
-                  : "☆"}
-
-              </button>
-
-            )
-          )}
+         {[1, 2, 3, 4, 5].map((star) => (
+  <button
+    key={star}
+    type="button"
+    onClick={() => setRating(star)}
+    className="hover:scale-110 transition"
+  >
+    <Star
+      size={28}
+      fill={star <= rating ? "#facc15" : "transparent"}
+      stroke="#facc15"
+    />
+  </button>
+))}
 
         </div>
 
@@ -383,24 +376,14 @@ export default function ProductReviews({
 
                 <div className="flex items-center gap-1 text-3xl">
 
-                  {[1, 2, 3, 4, 5].map(
-                    (star) => (
-
-                      <span
-                        key={star}
-                      >
-
-                        {star <=
-                        item.rating
-
-                          ? "⭐"
-
-                          : "☆"}
-
-                      </span>
-
-                    )
-                  )}
+                  {[1, 2, 3, 4, 5].map((star) => (
+  <Star
+    key={star}
+    size={18}
+    fill={star <= item.rating ? "#facc15" : "transparent"}
+    stroke="#facc15"
+  />
+))}
 
                 </div>
 
