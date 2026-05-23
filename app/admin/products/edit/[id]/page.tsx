@@ -37,47 +37,32 @@ export default function EditProductPage() {
   const [product, setProduct] =
     useState<any>(null);
 
-  useEffect(() => {
-
-    fetchProduct();
-
-  }, []);
-
+useEffect(() => {
   async function fetchProduct() {
-
     try {
-
       const docRef = doc(
         db,
         "products",
         String(params.id)
       );
 
-      const docSnap =
-        await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-
         setProduct({
-
-          id:
-            docSnap.id,
-
+          id: docSnap.id,
           ...docSnap.data(),
-
         });
-
       }
-
     } catch (error) {
-
       console.log(error);
-
     }
 
     setLoading(false);
-
   }
+
+  fetchProduct();
+}, [params.id]);
 
   async function handleImages(
     e: React.ChangeEvent<HTMLInputElement>
@@ -167,45 +152,30 @@ export default function EditProductPage() {
       setSaving(true);
 
       await updateDoc(
-        doc(
-          db,
-          "products",
-          String(params.id)
-        ),
-        {
+  doc(db, "products", String(params.id)),
+  {
+    name: product.name,
+    shortDescription: product.shortDescription,
+    description: product.description,
+    category: product.category,
+    price: product.price,
+    salePrice: product.salePrice,
+    stock: product.stock,
+    sizes: product.sizes || [],
 
-          name:
-            product.name,
+    // ✅ ALL IMAGES
+    mainImage: product.mainImage,
+    leftImage: product.leftImage,
+    rightImage: product.rightImage,
+    backImage: product.backImage,
+    productOnlyImage: product.productOnlyImage,
 
-          shortDescription:
-            product.shortDescription,
-
-          description:
-            product.description,
-
-          category:
-            product.category,
-
-          price:
-            product.price,
-
-          salePrice:
-            product.salePrice,
-
-          stock:
-            product.stock,
-
-          sizes:
-            product.sizes || [],
-
-          mainImage:
-            product.mainImage,
-
-          images:
-            product.images || [],
-
-        }
-      );
+    // ✅ LENGTHS (THIS WAS MISSING)
+    topLength: product.topLength,
+    bottomLength: product.bottomLength,
+    sleeves: product.sleeves,
+  }
+);
 
       alert(
         "Product Updated"
@@ -280,7 +250,34 @@ export default function EditProductPage() {
         </button>
 
       </div>
+<div className="grid md:grid-cols-3 gap-6">
+  <input
+    placeholder="Top Length"
+    value={product.topLength || ""}
+    onChange={(e) =>
+      setProduct({ ...product, topLength: e.target.value })
+    }
+    className="border p-3"
+  />
 
+  <input
+    placeholder="Bottom Length"
+    value={product.bottomLength || ""}
+    onChange={(e) =>
+      setProduct({ ...product, bottomLength: e.target.value })
+    }
+    className="border p-3"
+  />
+
+  <input
+    placeholder="Sleeves"
+    value={product.sleeves || ""}
+    onChange={(e) =>
+      setProduct({ ...product, sleeves: e.target.value })
+    }
+    className="border p-3"
+  />
+</div>
       <div className="space-y-6">
 
         {/* IMAGES */}

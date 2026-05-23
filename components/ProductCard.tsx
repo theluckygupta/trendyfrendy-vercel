@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Heart } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 
 export default function ProductCard({ product }: { product: any }) {
   const [hovered, setHovered] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+
+  const intervalRef = useRef<any>(null);
 
   const { wishlistItems, toggleWishlist } = useWishlist();
 
@@ -28,17 +30,20 @@ export default function ProductCard({ product }: { product: any }) {
     setHovered(true);
 
     let i = 0;
-    const interval = setInterval(() => {
+
+    intervalRef.current = setInterval(() => {
       i = (i + 1) % images.length;
       setImageIndex(i);
     }, 800);
-
-    setTimeout(() => clearInterval(interval), 4000);
   }
 
   function stopSlider() {
     setHovered(false);
     setImageIndex(0);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
   }
 
   const discount =
@@ -58,13 +63,15 @@ export default function ProductCard({ product }: { product: any }) {
         <div className="bg-[#111] rounded-md overflow-hidden relative">
 
           {/* IMAGE */}
-          <div className="relative overflow-hidden">
-            <img
-              src={images[imageIndex]}
-              alt={product.name}
-              className="w-full h-[260px] object-cover transition duration-700 group-hover:scale-110 group-hover:blur-[2px]"
-            />
+          <div className="relative overflow-hidden bg-[#111]">
 
+            <div className="w-full h-[260px] bg-[#111] flex items-center justify-center overflow-hidden">
+  <img
+    src={images[imageIndex]}
+    alt={product.name}
+    className="max-h-full max-w-full object-contain transition duration-700 group-hover:scale-110"
+  />
+</div>
             {/* GRADIENT */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
 
@@ -112,7 +119,6 @@ export default function ProductCard({ product }: { product: any }) {
               {product.name}
             </p>
 
-            {/* PRICE */}
             <div className="mt-1 flex items-center gap-2 flex-wrap">
               <span className="text-sm font-semibold">
                 ₹{product.salePrice || product.price}
@@ -131,7 +137,6 @@ export default function ProductCard({ product }: { product: any }) {
               )}
             </div>
 
-            {/* SIZES */}
             {product.sizes && (
               <p className="text-xs text-gray-400 mt-1">
                 Sizes: {product.sizes.join(", ")}
