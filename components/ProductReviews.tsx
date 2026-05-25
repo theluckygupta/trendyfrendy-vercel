@@ -2,23 +2,18 @@
 
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
-
 import {
   collection,
   addDoc,
   query,
   where,
   getDocs,
+  orderBy,
 } from "firebase/firestore";
-
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 
-export default function ProductReviews({
-  productId,
-}: {
-  productId: string;
-}) {
+export default function ProductReviews({ productId }: { productId: string }) {
   const { user, loginWithGoogle } = useAuth();
 
   const [reviews, setReviews] = useState<any[]>([]);
@@ -27,67 +22,54 @@ export default function ProductReviews({
   const [loading, setLoading] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
 
-  // 🔥 FETCH REVIEWS
+  // 🔥 FETCH REVIEWS (FIXED)
   async function fetchReviews() {
-    try {
-      const snapshot = await getDocs(collection(db, "reviews"));
+    const q = query(
+      collection(db, "reviews"),
+      where("productId", "==", productId),
+      orderBy("createdAt", "desc")
+    );
 
-      const data = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter(
-          (r: any) =>
-            r.productId?.toString() === productId?.toString()
-        )
-        .sort(
-          (a: any, b: any) =>
-            b.createdAt - a.createdAt
-        );
+    const snapshot = await getDocs(q);
 
-      setReviews(data);
-    } catch (error) {
-      console.log(error);
-    }
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setReviews(data);
   }
 
-  // 🔥 CHECK IF USER PURCHASED
+  // 🔥 CHECK PURCHASE
   async function checkPurchase() {
     if (!user) return;
 
-    try {
-      const q = query(
-        collection(db, "orders"),
-        where("userId", "==", user.uid),
-        where("productIds", "array-contains", productId)
-      );
+    const snapshot = await getDocs(collection(db, "orders"));
 
-      const snapshot = await getDocs(q);
+    const orders = snapshot.docs.map((doc) => doc.data());
 
-      setHasPurchased(!snapshot.empty);
-    } catch (error) {
-      console.log(error);
-    }
+    const purchased = orders.some(
+      (order: any) =>
+        order.userEmail === user.email &&
+        order.products?.some(
+          (p: any) => p.productId === productId
+        )
+    );
+
+    setHasPurchased(purchased);
   }
 
   useEffect(() => {
     fetchReviews();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      checkPurchase();
-    }
+    checkPurchase();
   }, [user]);
 
   // 🔥 SUBMIT REVIEW
   async function submitReview() {
-    if (!user) return;
-    if (!hasPurchased) {
-      alert("You can review only after purchase");
-      return;
-    }
+    if (!user) return alert("Login Required");
+    if (!hasPurchased)
+      return alert("You must purchase this product first");
+
     if (!review) return;
 
     try {
@@ -106,186 +88,142 @@ export default function ProductReviews({
       setReview("");
       setRating(5);
       fetchReviews();
-
-      alert("Review Added 😎");
     } catch (error) {
       console.log(error);
-      alert("Failed to add review");
     }
 
     setLoading(false);
   }
 
-  // 🔥 AVERAGE RATING
   const averageRating =
     reviews.length > 0
       ? (
-          reviews.reduce(
-            (total, item: any) => total + item.rating,
-            0
-          ) / reviews.length
+          reviews.reduce((t, r: any) => t + r.rating, 0) /
+          reviews.length
         ).toFixed(1)
       : "0";
 
   return (
     <section className="mt-28">
+
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex justify-between mb-12">
         <div>
-          <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-3">
-            Customer Reviews
-          </p>
-          <h2 className="text-5xl font-black">
+          <h2 className="text-4xl font-bold">
             Reviews & Ratings
           </h2>
         </div>
-
         <div className="text-right">
-          <p className="text-5xl font-black">
-            {averageRating}
+          <p className="text-4xl font-bold">
+            {averageRating} ★
           </p>
-          <p className="text-gray-400 mt-2">
+          <p className="text-gray-400">
             {reviews.length} Reviews
           </p>
         </div>
       </div>
 
-      {/* ⭐ REVIEW BOX */}
-      <div className="bg-[#111] border border-white/10 rounded-[2rem] p-8 mb-16">
-        <h3 className="text-3xl font-bold mb-8">
-          Write A Review
-        </h3>
+      {/* 🔥 MYNTRA BARS */}
+      <div className="mb-12 max-w-md">
+        {[5, 4, 3, 2, 1].map((star) => {
+          const count = reviews.filter(
+            (r) => r.rating === star
+          ).length;
 
-        {/* ❌ NOT LOGGED IN */}
+          const percent = reviews.length
+            ? (count / reviews.length) * 100
+            : 0;
+
+          return (
+            <div key={star} className="flex items-center gap-3 mb-2">
+              <span>{star}★</span>
+              <div className="flex-1 h-2 bg-gray-700 rounded">
+                <div
+                  className="h-2 bg-green-500 rounded"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <span className="text-sm text-gray-400">
+                {count}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 🔥 REVIEW FORM */}
+      <div className="bg-[#111] border border-white/10 rounded-2xl p-6 mb-10">
+
         {!user && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-8">
-            <p className="text-red-400 mb-5">
-              Login Required To Write Review
-            </p>
-            <button
-              onClick={loginWithGoogle}
-              className="bg-white text-black px-6 py-3 rounded-full font-semibold"
-            >
-              Login With Google
-            </button>
-          </div>
+          <button
+            onClick={loginWithGoogle}
+            className="bg-white text-black px-6 py-3 rounded-full"
+          >
+            Login to write review
+          </button>
         )}
 
-        {/* ⚠️ NOT PURCHASED */}
         {user && !hasPurchased && (
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 mb-8">
-            <p className="text-yellow-400">
-              You can review this product only after purchasing it
-            </p>
-          </div>
+          <p className="text-yellow-400">
+            Only buyers can review this product
+          </p>
         )}
 
-        {/* ✅ CAN REVIEW */}
         {user && hasPurchased && (
           <>
-            {/* USER INFO */}
-            <div className="flex items-center gap-4 mb-8">
-              <img
-                src={user.photoURL || "/user.png"}
-                alt=""
-                className="w-14 h-14 rounded-full object-cover"
-              />
-              <div>
-                <h4 className="font-semibold text-lg">
-                  {user.displayName}
-                </h4>
-                <p className="text-gray-400 text-sm">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-
-            {/* ⭐ STARS */}
-            <div className="flex gap-3 mb-8">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                >
+            <div className="flex gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button key={s} onClick={() => setRating(s)}>
                   <Star
-                    size={28}
-                    fill={
-                      star <= rating
-                        ? "#facc15"
-                        : "transparent"
-                    }
+                    size={20}
+                    fill={s <= rating ? "#facc15" : "transparent"}
                     stroke="#facc15"
                   />
                 </button>
               ))}
             </div>
 
-            {/* TEXT */}
             <textarea
-              rows={5}
               value={review}
               onChange={(e) =>
                 setReview(e.target.value)
               }
-              placeholder="Write your review..."
-              className="w-full bg-black border border-white/10 rounded-2xl p-5 outline-none resize-none"
+              className="w-full bg-black p-4 rounded mb-4"
+              placeholder="Write review..."
             />
 
             <button
               onClick={submitReview}
               disabled={loading}
-              className="mt-6 bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
+              className="bg-white text-black px-6 py-3 rounded"
             >
-              {loading ? "Posting..." : "Submit Review"}
+              Submit
             </button>
           </>
         )}
       </div>
 
-      {/* 🧾 REVIEWS LIST */}
-      <div className="space-y-8">
-        {reviews.map((item: any) => (
+      {/* REVIEWS LIST */}
+      <div className="space-y-6">
+        {reviews.map((r: any) => (
           <div
-            key={item.id}
-            className="bg-[#111] border border-white/10 rounded-[2rem] p-8"
+            key={r.id}
+            className="bg-[#111] p-6 rounded-2xl"
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <img
-                  src={item.userPhoto || "/user.png"}
-                  alt=""
-                  className="w-14 h-14 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="text-xl font-bold">
-                    {item.name}
-                  </h3>
-                  <span className="text-green-400 text-sm">
-                    Verified Buyer
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
+            <div className="flex justify-between mb-2">
+              <h3>{r.name}</h3>
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((s) => (
                   <Star
-                    key={star}
-                    size={18}
-                    fill={
-                      star <= item.rating
-                        ? "#facc15"
-                        : "transparent"
-                    }
+                    key={s}
+                    size={16}
+                    fill={s <= r.rating ? "#facc15" : "transparent"}
                     stroke="#facc15"
                   />
                 ))}
               </div>
             </div>
-
-            <p className="text-gray-300 leading-7">
-              {item.review}
-            </p>
+            <p className="text-gray-400">{r.review}</p>
           </div>
         ))}
       </div>

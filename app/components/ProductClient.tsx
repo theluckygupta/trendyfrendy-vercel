@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import ProductReviews from "@/components/ProductReviews";
-
-import {
-  doc,
-  getDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
-
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
 import { useEffect, useState } from "react";
 
 export default function ProductClient({
@@ -19,71 +11,57 @@ export default function ProductClient({
 }: {
   productId: string;
 }) {
-
-  const [liked, setLiked] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [similarProducts, setSimilarProducts] = useState<any[]>([]);
   const [selectedSize, setSelectedSize] = useState("");
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+  // 🔥 FETCH PRODUCT + SIMILAR
   useEffect(() => {
-    async function fetchProduct() {
+    async function fetchData() {
       try {
-        if (!productId) {
-          setLoading(false);
-          return;
-        }
+        if (!productId) return;
 
         const docRef = doc(db, "products", productId);
         const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-          const data: any = {
-            id: docSnap.id,
-            ...docSnap.data(),
-          };
-
-          setProduct(data);
-
-          // SIMILAR PRODUCTS
-          const querySnapshot = await getDocs(collection(db, "products"));
-
-          const similar = querySnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter(
-              (item: any) =>
-                item.category === data.category && item.id !== data.id
-            )
-            .slice(0, 4);
-
-          setSimilarProducts(similar);
-
-          // REVIEWS
-          const reviewsSnapshot = await getDocs(collection(db, "reviews"));
-
-          const productReviews = reviewsSnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter((review: any) => review.productId === data.id);
-
-          setReviews(productReviews);
+        if (!docSnap.exists()) {
+          setLoading(false);
+          return;
         }
-      } catch (error) {
-        console.log(error);
+
+        const data: any = {
+          id: docSnap.id,
+          ...docSnap.data(),
+        };
+
+        setProduct(data);
+
+        // 🔥 SIMILAR PRODUCTS
+        const snapshot = await getDocs(collection(db, "products"));
+
+        const similar = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter(
+            (item: any) =>
+              item.category === data.category &&
+              item.id !== data.id
+          )
+          .slice(0, 4);
+
+        setSimilarProducts(similar);
+      } catch (err) {
+        console.log(err);
       }
 
       setLoading(false);
     }
 
-    fetchProduct();
+    fetchData();
   }, [productId]);
 
   if (loading) {
@@ -102,17 +80,7 @@ export default function ProductClient({
     );
   }
 
-  const averageRating =
-    reviews.length > 0
-      ? (
-          reviews.reduce(
-            (total: number, item: any) => total + item.rating,
-            0
-          ) / reviews.length
-        ).toFixed(1)
-      : "0";
-
-  const galleryImages = [
+  const images = [
     product.mainImage,
     product.leftImage,
     product.rightImage,
@@ -121,72 +89,62 @@ export default function ProductClient({
   ].filter(Boolean);
 
   return (
-    <main className="bg-[#0a0a0a] text-white min-h-screen pt-10">
+    <main className="bg-black text-white min-h-screen pt-10">
 
-      <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-[58%_42%] gap-10">
+      {/* 🔥 TOP SECTION */}
+      <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-[55%_45%] gap-10">
 
-        {/* LEFT IMAGES */}
-        <div className="columns-2 gap-4 space-y-4">
-          {galleryImages.map((image: string, index: number) => (
+        {/* LEFT → IMAGES */}
+        <div className="grid grid-cols-2 gap-4">
+          {images.map((img: string, i: number) => (
             <div
-              key={`${image}-${index}`}
-              onClick={() => setPreviewImage(image)}
-              className="bg-[#111] rounded-2xl overflow-hidden break-inside-avoid cursor-zoom-in group"
+              key={i}
+              onClick={() => setPreviewImage(img)}
+              className="bg-[#111] rounded-2xl overflow-hidden cursor-zoom-in flex items-center justify-center"
             >
               <img
-                src={image}
+                src={img}
                 alt=""
-                className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-125 pointer-events-none"
+                className="max-h-[500px] object-contain"
               />
             </div>
           ))}
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="sticky top-24 h-fit bg-[#111] border border-white/10 rounded-[2rem] p-8">
+        {/* RIGHT → PRODUCT INFO */}
+        <div className="sticky top-24 h-fit bg-[#111] p-8 rounded-2xl border border-white/10">
 
-          <h2 className="text-3xl font-bold">TrendyFrenzy</h2>
+          <h2 className="text-2xl font-bold">TrendyFrenzy</h2>
 
-          <h1 className="text-2xl text-gray-300 mt-2">
+          <h1 className="text-xl text-gray-300 mt-2">
             {product.name}
           </h1>
 
-          {/* RATING */}
-          <div className="mt-5 border border-white/10 rounded-md px-4 py-2 inline-flex items-center gap-3">
-            <span className="font-bold">{averageRating} ★</span>
-            <span className="text-gray-400">|</span>
-            <span className="text-gray-300">
-              {reviews.length} Reviews
-            </span>
-          </div>
-
           {/* PRICE */}
-          <div className="mt-6 flex items-center gap-3 flex-wrap">
-            <span className="text-4xl font-bold">
+          <div className="mt-6 flex gap-3 items-center">
+            <span className="text-3xl font-bold">
               ₹{product.salePrice || product.price}
             </span>
 
             {product.salePrice && (
-              <>
-                <span className="line-through text-gray-500 text-2xl">
-                  ₹{product.price}
-                </span>
-              </>
+              <span className="line-through text-gray-500">
+                ₹{product.price}
+              </span>
             )}
           </div>
 
           {/* SIZE */}
-          <div className="mt-10">
-            <h3 className="font-bold text-lg mb-5">SELECT SIZE</h3>
+          <div className="mt-8">
+            <h3 className="font-semibold mb-4">SELECT SIZE</h3>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex gap-3 flex-wrap">
               {product.sizes?.map((size: string) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`w-16 h-16 rounded-full border ${
+                  className={`px-4 py-2 border rounded-full ${
                     selectedSize === size
-                      ? "border-[#d6c2a8] text-[#d6c2a8]"
+                      ? "border-white"
                       : "border-white/20"
                   }`}
                 >
@@ -199,27 +157,60 @@ export default function ProductClient({
         </div>
       </div>
 
-      {/* FULLSCREEN PREVIEW */}
+      {/* 🔥 IMAGE PREVIEW */}
       {previewImage && (
         <div
-          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black/95 flex items-center justify-center z-50"
           onClick={() => setPreviewImage(null)}
         >
           <img
             src={previewImage}
-            alt=""
-            className="max-h-[90%] max-w-[90%] object-contain"
+            className="max-w-[90%] max-h-[90%] object-contain"
           />
-
-          <button className="absolute top-6 right-6 text-white text-3xl">
-            ✕
-          </button>
         </div>
       )}
 
-      {/* REVIEWS */}
-      <div className="max-w-7xl mx-auto px-4 mt-24">
-        <ProductReviews productId={product.id} />
+      {/* 🔥 BOTTOM SECTION */}
+      <div className="max-w-7xl mx-auto px-4 mt-24 grid lg:grid-cols-[40%_60%] gap-10">
+
+        {/* LEFT → SIMILAR PRODUCTS */}
+        <div className="sticky top-24 h-fit">
+          <h2 className="text-xl font-bold mb-6">
+            Similar Products
+          </h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            {similarProducts.map((item: any) => (
+              <Link key={item.id} href={`/products/${item.id}`}>
+                <div className="bg-[#111] rounded-xl overflow-hidden p-2">
+
+                  <div className="h-[180px] flex items-center justify-center">
+                    <img
+                      src={item.mainImage}
+                      alt=""
+                      className="max-h-full object-contain"
+                    />
+                  </div>
+
+                  <p className="text-sm mt-2 line-clamp-1">
+                    {item.name}
+                  </p>
+
+                  <p className="text-sm text-gray-400">
+                    ₹{item.salePrice || item.price}
+                  </p>
+
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT → REVIEWS */}
+        <div>
+          <ProductReviews productId={product.id} />
+        </div>
+
       </div>
 
     </main>
