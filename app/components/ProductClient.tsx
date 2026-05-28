@@ -343,14 +343,50 @@ const [showToast, setShowToast] = useState(false);
             </div>
 
             <div className="flex border-b border-white/10">
-              <button onClick={() => setActiveTab("size")} className="flex-1 py-3">
-                Size Chart
-              </button>
-              <button onClick={() => setActiveTab("measure")} className="flex-1 py-3">
-                How to measure
-              </button>
-              
-            </div>
+
+  <button
+    onClick={() => setActiveTab("size")}
+    className={`flex-1 py-3 text-sm transition ${
+      activeTab === "size"
+        ? "border-b-2 border-white text-white font-semibold"
+        : "text-gray-500 hover:text-white"
+    }`}
+  >
+    Size Chart
+  </button>
+
+  <button
+    onClick={() => setActiveTab("measure")}
+    className={`flex-1 py-3 text-sm transition ${
+      activeTab === "measure"
+        ? "border-b-2 border-white text-white font-semibold"
+        : "text-gray-500 hover:text-white"
+    }`}
+  >
+    How to measure
+  </button>
+{activeTab === "measure" && (
+  <div className="p-6 text-center">
+
+    <h3 className="text-lg font-semibold mb-4">
+      How to measure yourself
+    </h3>
+
+    <img
+      src="/size-guide.png"
+      alt="size guide"
+      className="mx-auto max-h-[300px] object-contain"
+    />
+
+    <div className="text-gray-400 text-sm mt-4 space-y-2">
+      <p><b>Bust:</b> Measure around fullest part</p>
+      <p><b>Waist:</b> Measure natural waistline</p>
+      <p><b>Length:</b> Shoulder to hem</p>
+    </div>
+
+  </div>
+)}
+</div>
 
             {activeTab === "size" && (
               <div className="p-6">
