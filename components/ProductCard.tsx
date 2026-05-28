@@ -5,7 +5,15 @@ import { useState, useRef } from "react";
 import { Heart } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 
-export default function ProductCard({ product }: { product: any }) {
+type Props = {
+  product: any;
+  setSelectedProduct?: (product: any) => void; // ✅ FIXED
+};
+
+export default function ProductCard({
+  product,
+  setSelectedProduct,
+}: Props) {
   const [hovered, setHovered] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
 
@@ -59,93 +67,99 @@ export default function ProductCard({ product }: { product: any }) {
       onMouseEnter={startSlider}
       onMouseLeave={stopSlider}
     >
-      <Link href={`/products/${product.id}`}>
-        <div className="bg-[#111] rounded-md overflow-hidden relative">
+      {/* 🔥 CLICK HANDLER FIX */}
+      <div
+        onClick={() => setSelectedProduct?.(product)}
+      >
+        <Link href={`/products/${product.id}`}>
+          <div className="bg-[#111] rounded-md overflow-hidden relative">
 
-          {/* IMAGE */}
-          <div className="relative overflow-hidden bg-[#111]">
+            {/* IMAGE */}
+            <div className="relative overflow-hidden bg-[#111]">
 
-            <div className="w-full h-[260px] bg-[#111] flex items-center justify-center overflow-hidden">
-  <img
-    src={images[imageIndex]}
-    alt={product.name}
-    className="max-h-full max-w-full object-contain transition duration-700 group-hover:scale-110"
-  />
-</div>
-            {/* GRADIENT */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
-
-            {/* DOTS */}
-            {hovered && images.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-                {images.map((_: any, i: number) => (
-                  <div
-                    key={i}
-                    className={`w-2 h-2 rounded-full ${
-                      i === imageIndex ? "bg-pink-500" : "bg-gray-400"
-                    }`}
-                  />
-                ))}
+              <div className="w-full h-[260px] flex items-center justify-center overflow-hidden">
+                <img
+                  src={images[imageIndex]}
+                  alt={product.name}
+                  className="max-h-full max-w-full object-contain transition duration-700 group-hover:scale-110"
+                />
               </div>
-            )}
 
-            {/* ❤️ WISHLIST */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleWishlist(product);
-              }}
-              className="absolute top-3 right-3 bg-white/90 p-2 rounded-full shadow hover:scale-110 transition z-20"
-            >
-              <Heart
-                size={16}
-                className={`transition ${
-                  liked
-                    ? "text-red-500 scale-125 animate-bounceOnce"
-                    : "text-black"
-                }`}
-              />
-            </button>
-          </div>
+              {/* GRADIENT */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
 
-          {/* CONTENT */}
-          <div className="p-3 text-white">
-            <h3 className="text-sm font-semibold">
-              {product.brand || "TrendyFrenzy"}
-            </h3>
+              {/* DOTS */}
+              {hovered && images.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                  {images.map((_: any, i: number) => (
+                    <div
+                      key={i}
+                      className={`w-2 h-2 rounded-full ${
+                        i === imageIndex ? "bg-pink-500" : "bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
 
-            <p className="text-sm text-gray-400 line-clamp-1">
-              {product.name}
-            </p>
+              {/* ❤️ WISHLIST */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleWishlist(product);
+                }}
+                className="absolute top-3 right-3 bg-white/90 p-2 rounded-full shadow hover:scale-110 transition z-20"
+              >
+                <Heart
+                  size={16}
+                  className={`transition ${
+                    liked
+                      ? "text-red-500 scale-125"
+                      : "text-black"
+                  }`}
+                />
+              </button>
+            </div>
 
-            <div className="mt-1 flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold">
-                ₹{product.salePrice || product.price}
-              </span>
+            {/* CONTENT */}
+            <div className="p-3 text-white">
+              <h3 className="text-sm font-semibold">
+                {product.brand || "TrendyFrenzy"}
+              </h3>
 
-              {product.salePrice && (
-                <>
-                  <span className="text-xs text-gray-500 line-through">
-                    ₹{product.price}
-                  </span>
+              <p className="text-sm text-gray-400 line-clamp-1">
+                {product.name}
+              </p>
 
-                  <span className="text-xs text-orange-400">
-                    ({discount}% OFF)
-                  </span>
-                </>
+              <div className="mt-1 flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-semibold">
+                  ₹{product.salePrice || product.price}
+                </span>
+
+                {product.salePrice && (
+                  <>
+                    <span className="text-xs text-gray-500 line-through">
+                      ₹{product.price}
+                    </span>
+
+                    <span className="text-xs text-orange-400">
+                      ({discount}% OFF)
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {product.sizes && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Sizes: {product.sizes.join(", ")}
+                </p>
               )}
             </div>
 
-            {product.sizes && (
-              <p className="text-xs text-gray-400 mt-1">
-                Sizes: {product.sizes.join(", ")}
-              </p>
-            )}
           </div>
-
-        </div>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
 }

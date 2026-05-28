@@ -280,7 +280,7 @@ export default function AdminLayout({
 
       {/* CONTENT */}
 
-      <main className="flex-1 p-4 md:p-10 overflow-x-hidden pt-24 md:pt-10">
+      <main className="flex-1 p-4 md:p-10 overflow-x-hidden">
 
         {children}
 

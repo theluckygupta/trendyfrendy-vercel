@@ -1,47 +1,39 @@
 "use client";
+
 import { useWishlist } from "@/context/WishlistContext";
-
 import Link from "next/link";
-
-import {
-  Search,
-  User,
-  Heart,
-  ShoppingBag,
-} from "lucide-react";
+import { Search, User, Heart, ShoppingBag } from "lucide-react";
 
 export default function Navbar({
   cartCount,
 }: {
   cartCount: number;
 }) {
-
-  const { wishlistItems } = useWishlist(); // ✅ correct place
+  const { wishlistItems } = useWishlist();
 
   return (
-    <>
+    <header className="fixed top-0 left-0 w-full z-50">
+
       {/* TOP BAR */}
-      <div className="w-full bg-white text-black text-center text-sm py-2 font-medium border-b">
+      <div className="bg-white text-black text-center text-sm py-2 font-medium border-b">
         No Return & Refund Policy • No COD • Exchange Only If Product Is Damaged
       </div>
 
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-black text-white border-b border-gray-200">
+      <nav className="bg-black text-white border-b border-gray-800">
         <div className="max-w-[1800px] mx-auto px-6 h-[80px] flex items-center justify-between gap-10">
 
           {/* LEFT */}
           <div className="flex items-center gap-12">
             
-            {/* LOGO */}
             <Link href="/">
               <img
                 src="/nav.png"
                 alt="logo"
-                className="h-20 w-60"
+                className="h-16 w-auto object-contain"
               />
             </Link>
 
-            {/* MENU */}
             <div className="hidden lg:flex items-center gap-8 text-sm font-bold uppercase tracking-wide">
               <Link href="/">HOME</Link>
               <Link href="/collections">COLLECTION</Link>
@@ -62,28 +54,23 @@ export default function Navbar({
           {/* RIGHT */}
           <div className="flex items-center gap-8">
 
-            {/* PROFILE */}
             <button className="flex flex-col items-center text-[11px] font-semibold">
               <User size={18} />
               <span className="mt-1">Profile</span>
             </button>
 
-            {/* WISHLIST */}
             <Link href="/wishlist" className="flex flex-col items-center text-[11px] font-semibold">
               <div className="relative">
                 <Heart size={18} />
-
                 {wishlistItems.length > 0 && (
                   <span className="absolute -top-2 -right-3 bg-pink-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
                 )}
               </div>
-
               <span className="mt-1">Wishlist</span>
             </Link>
 
-            {/* CART */}
             <button className="relative flex flex-col items-center text-[11px] font-semibold">
               <ShoppingBag size={18} />
               <span className="mt-1">Cart</span>
@@ -98,6 +85,6 @@ export default function Navbar({
           </div>
         </div>
       </nav>
-    </>
+    </header>
   );
 }

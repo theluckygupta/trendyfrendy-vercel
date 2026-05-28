@@ -247,21 +247,7 @@ export default function Home() {
 
           ) : (
 
-            <ProductGrid
-              products={
-                filteredProducts
-              }
-              setSelectedProduct={
-                setSelectedProduct
-              }
-              setCartItems={
-                setCartItems
-              }
-              setCartOpen={
-                setCartOpen
-              }
-            />
-
+           <ProductGrid products={filteredProducts} />
           )}
 
         </section>
