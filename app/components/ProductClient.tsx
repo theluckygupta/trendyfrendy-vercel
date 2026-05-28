@@ -24,7 +24,6 @@ export default function ProductClient({ productId }: { productId: string }) {
   const [activeTab, setActiveTab] = useState<"size" | "measure">("size");
   const [unit, setUnit] = useState<"in" | "cm">("in");
 
-  // 🔥 FETCH DATA
   useEffect(() => {
     async function fetchData() {
       const docSnap = await getDoc(doc(db, "products", productId));
@@ -67,6 +66,13 @@ export default function ProductClient({ productId }: { productId: string }) {
   const convert = (val: number) =>
     unit === "cm" ? (val * 2.54).toFixed(1) : val;
 
+  const discount =
+    product.salePrice && product.price
+      ? Math.round(
+          ((product.price - product.salePrice) / product.price) * 100
+        )
+      : null;
+
   return (
     <main className="bg-black text-white">
 
@@ -79,11 +85,11 @@ export default function ProductClient({ productId }: { productId: string }) {
             <div
               key={i}
               onClick={() => setPreviewImage(img)}
-              className="bg-[#111] rounded-xl overflow-hidden cursor-pointer"
+              className="bg-[#111] rounded-xl overflow-hidden cursor-zoom-in"
             >
               <img
                 src={img}
-                className="w-full h-full object-contain hover:scale-105 transition"
+                className="w-full h-full object-contain hover:scale-110 transition"
               />
             </div>
           ))}
@@ -101,10 +107,9 @@ export default function ProductClient({ productId }: { productId: string }) {
           </h1>
 
           <div className="mt-3 text-sm text-gray-300">
-            0 ★ | 0 Reviews
+            {wishlistItems.length} saved
           </div>
 
-          {/* PRICE */}
           <div className="mt-4 flex items-center gap-2">
             <span className="text-3xl font-bold">
               ₹{product.salePrice || product.price}
@@ -116,7 +121,7 @@ export default function ProductClient({ productId }: { productId: string }) {
                   ₹{product.price}
                 </span>
                 <span className="text-orange-400 text-sm">
-                  ({Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF)
+                  ({discount}% OFF)
                 </span>
               </>
             )}
@@ -130,9 +135,10 @@ export default function ProductClient({ productId }: { productId: string }) {
           <div className="mt-6">
             <div className="flex justify-between mb-2">
               <h3 className="text-sm font-semibold">SELECT SIZE</h3>
+
               <button
                 onClick={() => setShowSizeChart(true)}
-                className="text-xs text-[#d6c2a8]"
+                className="text-xs text-[#d6c2a8] z-10"
               >
                 SIZE CHART
               </button>
@@ -162,9 +168,8 @@ export default function ProductClient({ productId }: { productId: string }) {
           </div>
 
           {/* BUTTONS */}
-          <div className="flex gap-4 mt-6">
+          <div className="flex items-center gap-4 mt-6">
 
-            {/* ADD TO CART */}
             <button
               onClick={() => {
                 if (!selectedSize) {
@@ -173,12 +178,14 @@ export default function ProductClient({ productId }: { productId: string }) {
                 }
 
                 setCartItems((prev: any[]) => {
+                  if (!Array.isArray(prev)) return [];
+
                   const exists = prev.find((p) => p.id === product.id);
 
                   if (exists) {
                     return prev.map((p) =>
                       p.id === product.id
-                        ? { ...p, quantity: p.quantity + 1 }
+                        ? { ...p, quantity: (p.quantity || 1) + 1 }
                         : p
                     );
                   }
@@ -191,19 +198,26 @@ export default function ProductClient({ productId }: { productId: string }) {
               ADD TO BAG
             </button>
 
-            {/* WISHLIST */}
             <button
-              onClick={() => toggleWishlist(product)}
-              className="w-14 h-14 rounded-full border border-white/30 flex items-center justify-center"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWishlist(product);
+              }}
+              className="w-14 h-14 rounded-full border border-white/30"
             >
-              {wishlistItems.some((i: any) => i.id === product.id) ? "❤️" : "♡"}
+              {wishlistItems.some((i: any) => i.id === product.id)
+                ? "❤️"
+                : "♡"}
             </button>
 
           </div>
 
-          {/* PINCODE */}
+          {/* DELIVERY */}
           <div className="mt-8 border-t border-white/10 pt-6">
-            <h3 className="text-sm font-semibold mb-3">DELIVERY OPTIONS</h3>
+            <h3 className="text-sm font-semibold mb-3">
+              DELIVERY OPTIONS
+            </h3>
 
             <div className="flex border border-white/20 rounded overflow-hidden">
               <input
@@ -212,6 +226,7 @@ export default function ProductClient({ productId }: { productId: string }) {
                 placeholder="Enter pincode"
                 className="bg-black px-3 py-2 flex-1 outline-none"
               />
+
               <button
                 onClick={() => {
                   if (pincode.length !== 6) {
@@ -235,30 +250,13 @@ export default function ProductClient({ productId }: { productId: string }) {
 
           {/* DETAILS */}
           <div className="mt-8 border-t border-white/10 pt-6">
-            <h3 className="text-sm font-semibold mb-3">PRODUCT DETAILS</h3>
+            <h3 className="text-sm font-semibold mb-3">
+              PRODUCT DETAILS
+            </h3>
 
             <p className="text-gray-400 text-sm mb-4">
               {product.description || "No description available"}
             </p>
-
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-400">
-              <div>
-                <p>Top Length</p>
-                <p className="text-white">32</p>
-              </div>
-              <div>
-                <p>Sleeves</p>
-                <p className="text-white">18</p>
-              </div>
-              <div>
-                <p>Category</p>
-                <p className="text-white">{product.category}</p>
-              </div>
-              <div>
-                <p>Fabric</p>
-                <p className="text-white">Cotton</p>
-              </div>
-            </div>
           </div>
 
         </div>
@@ -267,17 +265,21 @@ export default function ProductClient({ productId }: { productId: string }) {
       {/* SIMILAR + REVIEWS */}
       <div className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-[40%_60%] gap-12 border-t border-white/10">
 
+        {/* SIMILAR */}
         <div>
-          <h2 className="text-xl font-bold mb-6">Similar Products</h2>
+          <h2 className="text-xl font-bold mb-6">
+            Similar Products
+          </h2>
 
           <div className="grid grid-cols-3 gap-4">
             {similarProducts.map((item: any) => (
               <Link key={item.id} href={`/products/${item.id}`}>
                 <div className="bg-[#111] p-3 rounded-xl hover:scale-105 transition">
-                  <div className="h-[180px] flex items-center justify-center">
-                    <img src={item.mainImage} className="max-h-full object-contain" />
-                  </div>
-                  <p className="text-sm mt-2 text-gray-300 line-clamp-1">
+                  <img
+                    src={item.mainImage}
+                    className="w-full h-[180px] object-contain"
+                  />
+                  <p className="text-sm mt-2 line-clamp-1">
                     {item.name}
                   </p>
                   <p className="text-sm font-semibold">
@@ -289,6 +291,7 @@ export default function ProductClient({ productId }: { productId: string }) {
           </div>
         </div>
 
+        {/* REVIEWS */}
         <div className="max-h-[600px] overflow-y-auto">
           <ProductReviews productId={product.id} />
         </div>
@@ -307,9 +310,9 @@ export default function ProductClient({ productId }: { productId: string }) {
 
       {/* SIZE CHART */}
       {showSizeChart && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center">
 
-          <div className="bg-[#111] w-[800px] max-w-[95%] rounded-xl overflow-hidden">
+          <div className="bg-[#111] w-[800px] max-w-[95%] rounded-xl">
 
             <div className="flex justify-between p-4 border-b border-white/10">
               <h2>Size Chart</h2>
@@ -318,27 +321,30 @@ export default function ProductClient({ productId }: { productId: string }) {
 
             <div className="flex border-b border-white/10">
               <button onClick={() => setActiveTab("size")} className="flex-1 py-3">
-                Size Chart
+                Size
               </button>
               <button onClick={() => setActiveTab("measure")} className="flex-1 py-3">
-                How to measure
+                Measure
               </button>
             </div>
 
-            {activeTab === "size" && (
-              <div className="p-6">
-                <table className="w-full text-sm text-center">
-                  <thead>
-                    <tr>
-                      <th>Size</th>
-                      <th>Bust</th>
-                      <th>Waist</th>
-                      <th>Length</th>
-                    </tr>
-                  </thead>
+            <div className="p-6">
+
+              {activeTab === "size" && (
+                <table className="w-full text-center">
                   <tbody>
                     {sizes.map((row) => (
                       <tr key={row.size}>
+                        <td>
+                          <input
+                            type="radio"
+                            checked={selectedSize === row.size}
+                            onChange={() => {
+                              setSelectedSize(row.size);
+                              setShowSizeChart(false);
+                            }}
+                          />
+                        </td>
                         <td>{row.size}</td>
                         <td>{convert(row.bust)}</td>
                         <td>{convert(row.waist)}</td>
@@ -347,8 +353,15 @@ export default function ProductClient({ productId }: { productId: string }) {
                     ))}
                   </tbody>
                 </table>
-              </div>
-            )}
+              )}
+
+              {activeTab === "measure" && (
+                <div className="text-center">
+                  <img src="/size-guide.png" className="mx-auto max-h-[300px]" />
+                </div>
+              )}
+
+            </div>
 
           </div>
         </div>
