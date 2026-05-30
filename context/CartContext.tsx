@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react";
-
 const CartContext =
   createContext<any>(null);
 
@@ -18,32 +17,35 @@ export function CartProvider({
 
   const [cartItems, setCartItems] =
     useState<any[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+useEffect(() => {
 
-  useEffect(() => {
-
-    const savedCart =
-      localStorage.getItem(
-        "cart"
-      );
-
-    if (savedCart) {
-
-      setCartItems(
-        JSON.parse(savedCart)
-      );
-
-    }
-
-  }, []);
-
-  useEffect(() => {
-
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(cartItems)
+  const savedCart =
+    localStorage.getItem(
+      "cart"
     );
 
-  }, [cartItems]);
+  if (savedCart) {
+
+    setCartItems(
+      JSON.parse(savedCart)
+    );
+
+  }
+
+  setIsLoaded(true);
+
+}, []);
+useEffect(() => {
+
+  if (!isLoaded) return;
+
+  localStorage.setItem(
+    "cart",
+    JSON.stringify(cartItems)
+  );
+
+}, [cartItems, isLoaded]);
 
   function addToCart(
     product: any
@@ -103,6 +105,11 @@ export function CartProvider({
       },
       0
     );
+    const cartCount = cartItems.reduce(
+  (total: number, item: any) =>
+    total + (item.quantity || 1),
+  0
+);
 
   return (
 
@@ -121,6 +128,9 @@ export function CartProvider({
 
         cartTotal,
 
+        cartCount,
+
+
       }}
     >
 
@@ -133,7 +143,6 @@ export function CartProvider({
 }
 
 export function useCart() {
-
   return useContext(
     CartContext
   );

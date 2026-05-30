@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import ProductReviews from "@/components/ProductReviews";
@@ -9,6 +10,7 @@ import { db } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 
 export default function ProductClient({ productId }: { productId: string }) {
+  const router = useRouter();
   const { cartItems, setCartItems } = useCart();
   const { wishlistItems, toggleWishlist } = useWishlist();
 const [addedToCart, setAddedToCart] = useState(false);
@@ -67,6 +69,11 @@ const [showToast, setShowToast] = useState(false);
 
   const convert = (val: number) =>
     unit === "cm" ? (val * 2.54).toFixed(1) : val;
+  const isInCart = cartItems?.some(
+  (item: any) =>
+    item.id === product?.id &&
+    item.size === selectedSize
+);
 
   return (
     <main className="bg-black text-white">
@@ -183,46 +190,70 @@ const [showToast, setShowToast] = useState(false);
           <div className="flex gap-4 mt-6">
 
             {/* ADD TO CART */}
-            <button
+          <button
   onClick={() => {
+
+    // Already in cart
+    if (isInCart) {
+      router.push("/cart");
+      return;
+    }
+
     if (!selectedSize) {
       alert("Select size first");
       return;
     }
 
     setCartItems((prev: any[]) => {
-      if (!Array.isArray(prev)) return [];
 
-      const exists = prev.find((p) => p.id === product.id);
+      const exists = prev.find(
+        (p) =>
+          p.id === product.id &&
+          p.size === selectedSize
+      );
 
       if (exists) {
         return prev.map((p) =>
-          p.id === product.id
-            ? { ...p, quantity: (p.quantity || 1) + 1 }
+          p.id === product.id &&
+          p.size === selectedSize
+            ? {
+                ...p,
+                quantity: (p.quantity || 1) + 1,
+              }
             : p
         );
       }
 
-      return [...prev, { ...product, quantity: 1, size: selectedSize }];
+      return [
+        ...prev,
+        {
+          ...product,
+          quantity: 1,
+          size: selectedSize,
+        },
+      ];
     });
 
-    setAddedToCart(true);
     setShowToast(true);
 
     setTimeout(() => {
       setShowToast(false);
     }, 2500);
   }}
-  className="flex-1 py-4 rounded-full border border-white hover:bg-white hover:text-black transition"
+  className={`flex-1 py-4 rounded-full transition font-semibold ${
+    isInCart
+      ? "bg-white text-black"
+      : "border border-white hover:bg-white hover:text-black"
+  }`}
 >
-  {addedToCart ? "GO TO BAG →" : "ADD TO BAG"}
+  {isInCart ? "GO TO BAG →" : "ADD TO BAG"}
 </button>
             {/* WISHLIST */}
             <button
               onClick={() => toggleWishlist(product)}
               className="w-14 h-14 rounded-full border border-white/30 flex items-center justify-center"
             >
-              {wishlistItems.some((i: any) => i.id === product.id) ? "❤️" : "♡"}
+              {wishlistItems.some((i: any) => i.productid === product.id) ? "❤️" : "♡"}
             </button>
 
           </div>

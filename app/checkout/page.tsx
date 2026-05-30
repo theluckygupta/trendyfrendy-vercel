@@ -103,10 +103,7 @@ Total: ₹${total}
 
     <>
 
-     <Navbar
-  cartCount={cartItems.length}
-/>
-
+    <Navbar />
       <main className="min-h-screen bg-[#0a0a0a] text-white px-6 py-24">
 
         <div className="max-w-7xl mx-auto">

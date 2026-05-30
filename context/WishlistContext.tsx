@@ -65,11 +65,6 @@ export function WishlistProvider({
     if (!user) {
       alert("Login required");
       await loginWithGoogle();
-
-      setTimeout(() => {
-        toggleWishlist(product); // retry
-      }, 500);
-
       return;
     }
 

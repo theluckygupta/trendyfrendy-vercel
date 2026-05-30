@@ -1,15 +1,13 @@
 "use client";
 
 import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext";
 import Link from "next/link";
 import { Search, User, Heart, ShoppingBag } from "lucide-react";
 
-export default function Navbar({
-  cartCount,
-}: {
-  cartCount: number;
-}) {
+export default function Navbar() {
   const { wishlistItems } = useWishlist();
+  const { cartCount } = useCart();
 
   return (
     <header className="fixed top-0 left-0 w-full z-50">
@@ -71,7 +69,10 @@ export default function Navbar({
               <span className="mt-1">Wishlist</span>
             </Link>
 
-            <button className="relative flex flex-col items-center text-[11px] font-semibold">
+            <Link
+  href="/cart"
+  className="relative flex flex-col items-center text-[11px] font-semibold"
+>
               <ShoppingBag size={18} />
               <span className="mt-1">Cart</span>
 
@@ -80,7 +81,7 @@ export default function Navbar({
                   {cartCount}
                 </span>
               )}
-            </button>
+            </Link>
 
           </div>
         </div>
