@@ -1,391 +1,298 @@
 "use client";
 
 import Link from "next/link";
-
-import Navbar from "@/components/Navbar";
-
-import {
-  useCart,
-} from "@/context/CartContext";
-
-import {
-  useAuth,
-} from "@/context/AuthContext";
+import { useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function CheckoutPage() {
+  const { cartItems, clearCart } = useCart();
 
-  const {
-    cartItems,
-    setCartItems,
-  } = useCart();
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
 
-  const {
-    user,
-    login,
-    logout,
-  } = useAuth();
+  const totalMRP = cartItems.reduce(
+    (total: number, item: any) =>
+      total + Number(item.price) * (item.quantity || 1),
+    0
+  );
 
-  const total =
-    cartItems.reduce(
+  const totalAmount = cartItems.reduce(
+    (total: number, item: any) =>
+      total +
+      Number(item.salePrice || item.price) *
+        (item.quantity || 1),
+    0
+  );
 
-      (
-        total: number,
-        item: any
-      ) => {
-
-        const numericPrice =
-          Number(
-            item.salePrice ||
-            item.price
-          );
-
-        return (
-          total +
-          numericPrice *
-            (item.quantity || 1)
-        );
-
-      },
-
-      0
-
-    );
-
-  async function handleCheckout() {
-
-    if (!user) {
-
-      try {
-
-        await login();
-
-        return;
-
-      } catch (error: any) {
-
-        alert(
-          error.message
-        );
-
-        console.log(error);
-
-        return;
-
-      }
-
-    }
-
-    const orderText = `🛍️ New Order - TrendyFrenzy
-
-${cartItems.map(
-  (item: any) =>
-
-`• ${item.name}
-₹${item.salePrice || item.price}`
-).join("\n\n")}
-
-----------------------------
-
-Total: ₹${total}
-`;
-
-    window.open(
-
-      `https://wa.me/917019650441?text=${encodeURIComponent(orderText)}`,
-
-      "_blank"
-
-    );
-
+  const discount = totalMRP - totalAmount;
+  async function placeOrder() {
+  if (
+    !fullName ||
+    !phone ||
+    !address ||
+    !city ||
+    !state ||
+    !pincode
+  ) {
+    alert("Please fill all fields");
+    return;
   }
 
+  try {
+    await addDoc(collection(db, "orders"), {
+      customerName: fullName,
+      phone,
+      address,
+      city,
+      state,
+      pincode,
+
+      items: cartItems,
+
+      totalMRP,
+      discount,
+      totalAmount,
+
+      status: "Pending",
+
+      createdAt: Date.now(),
+    });
+
+    clearCart();
+
+    window.location.href = "/order-success";
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to place order");
+  }
+}
+
   return (
+    <main className="min-h-screen bg-black text-white pt-32 pb-20">
+      <div className="max-w-7xl mx-auto px-6">
 
-    <>
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-10 border-b border-white/10 pb-6">
 
-    <Navbar />
-      <main className="min-h-screen bg-[#0a0a0a] text-white px-6 py-24">
+          <div className="flex items-center gap-6 text-sm tracking-[4px] uppercase">
 
-        <div className="max-w-7xl mx-auto">
-
-          {/* HEADER */}
-
-          <div className="flex items-center justify-between mb-16">
-
-            <div>
-
-              <p className="uppercase tracking-[0.3em] text-[#d6c2a8] text-sm mb-4">
-
-                Checkout
-
-              </p>
-
-              <h1 className="text-5xl md:text-7xl font-black">
-
-                Your Cart
-
-              </h1>
-
+            <div className="text-gray-500">
+              Bag
             </div>
 
-            <Link
-              href="/"
-              className="border border-white/10 px-6 py-3 rounded-full hover:border-[#d6c2a8] hover:text-[#d6c2a8] transition"
-            >
+            <div className="text-gray-600">
+              ----------
+            </div>
 
-              Continue Shopping
+            <div className="text-green-400 font-semibold">
+              Address
+            </div>
 
-            </Link>
+            <div className="text-gray-600">
+              ----------
+            </div>
+
+            <div className="text-gray-500">
+              Payment
+            </div>
 
           </div>
 
-          {/* EMPTY */}
-
-          {cartItems.length === 0 && (
-
-            <div className="text-center py-32">
-
-              <h2 className="text-4xl font-bold mb-6">
-
-                Your cart is empty
-
-              </h2>
-
-              <Link
-                href="/"
-                className="inline-block bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-[#d6c2a8] transition"
-              >
-
-                Shop Now
-
-              </Link>
-
-            </div>
-
-          )}
-
-          {/* CART */}
-
-          {cartItems.length > 0 && (
-
-            <div className="grid lg:grid-cols-[1fr_420px] gap-12">
-
-              {/* LEFT */}
-
-              <div className="space-y-8">
-
-                {cartItems.map(
-
-                  (
-                    item: any,
-                    index: number
-                  ) => (
-
-                    <div
-                      key={index}
-                      className="bg-[#111] border border-white/10 rounded-[2rem] p-6 flex gap-6"
-                    >
-
-                      <img
-                        src={
-                          item.mainImage ||
-                          item.image
-                        }
-                        alt={item.name}
-                        className="w-36 h-44 object-cover rounded-2xl"
-                      />
-
-                      <div className="flex-1 flex flex-col justify-between">
-
-                        <div>
-
-                          <p className="uppercase tracking-[0.2em] text-[#d6c2a8] text-xs mb-3">
-
-                            {item.category ||
-                              "Luxury"}
-
-                          </p>
-
-                          <h2 className="text-3xl font-bold mb-4">
-
-                            {item.name}
-
-                          </h2>
-
-                          <p className="text-gray-400 leading-7">
-
-                            {item.shortDescription}
-
-                          </p>
-
-                        </div>
-
-                        <div className="flex items-center justify-between mt-6">
-
-                          <div className="flex items-center gap-4">
-
-                            <p className="text-3xl font-bold">
-
-                              ₹
-                              {item.salePrice ||
-                                item.price}
-
-                            </p>
-
-                            {item.salePrice && (
-
-                              <p className="text-gray-500 line-through">
-
-                                ₹
-                                {item.price}
-
-                              </p>
-
-                            )}
-
-                          </div>
-
-                          <button
-                            onClick={() =>
-
-                              setCartItems(
-                                (
-                                  prev: any[]
-                                ) =>
-
-                                  prev.filter(
-                                    (
-                                      _: any,
-                                      i: number
-                                    ) =>
-
-                                      i !== index
-                                  )
-                              )
-
-                            }
-                            className="text-red-400 hover:text-red-300 transition"
-                          >
-
-                            Remove
-
-                          </button>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  )
-
-                )}
-
-              </div>
-
-              {/* RIGHT */}
-
-              <div className="bg-[#111] border border-white/10 rounded-[2rem] p-8 h-fit sticky top-24">
-
-                <h2 className="text-4xl font-bold mb-10">
-
-                  Order Summary
-
-                </h2>
-
-                <div className="space-y-5 mb-10">
-
-                  <div className="flex justify-between text-lg">
-
-                    <span className="text-gray-400">
-
-                      Products
-
-                    </span>
-
-                    <span>
-
-                      {cartItems.length}
-
-                    </span>
-
-                  </div>
-
-                  <div className="flex justify-between text-lg">
-
-                    <span className="text-gray-400">
-
-                      Shipping
-
-                    </span>
-
-                    <span>
-
-                      Free
-
-                    </span>
-
-                  </div>
-
-                </div>
-
-                <div className="border-t border-white/10 pt-8 mb-10">
-
-                  <div className="flex justify-between items-center">
-
-                    <span className="text-2xl font-semibold">
-
-                      Total
-
-                    </span>
-
-                    <span className="text-4xl font-black text-[#d6c2a8]">
-
-                      ₹
-                      {total.toLocaleString()}
-
-                    </span>
-
-                  </div>
-
-                </div>
-
-                <button
-                  onClick={handleCheckout}
-                  className="w-full bg-white text-black py-5 rounded-full text-lg font-semibold hover:bg-[#d6c2a8] transition"
-                >
-
-                  {user
-                    ? "Proceed To Checkout"
-                    : "Login With Google"}
-
-                </button>
-
-                {user && (
-
-                  <button
-                    onClick={logout}
-                    className="mt-4 w-full border border-white/10 py-5 rounded-full text-lg font-semibold hover:border-red-500 hover:text-red-400 transition"
-                  >
-
-                    Logout
-
-                  </button>
-
-                )}
-
-              </div>
-
-            </div>
-
-          )}
+          <div className="text-green-400 text-sm font-semibold">
+            🔒 100% Secure
+          </div>
 
         </div>
 
-      </main>
+        <div className="grid lg:grid-cols-[65%_35%] gap-10">
 
-    </>
+          {/* LEFT */}
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6">
 
+            <h2 className="text-2xl font-bold mb-6">
+              Delivery Address
+            </h2>
+
+            <div className="space-y-4">
+
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) =>
+                  setFullName(e.target.value)
+                }
+                className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 outline-none"
+              />
+
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(e.target.value)
+                }
+                className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 outline-none"
+              />
+
+              <textarea
+                placeholder="Address"
+                value={address}
+                onChange={(e) =>
+                  setAddress(e.target.value)
+                }
+                rows={4}
+                className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 outline-none"
+              />
+
+              <div className="grid md:grid-cols-3 gap-4">
+
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) =>
+                    setCity(e.target.value)
+                  }
+                  className="bg-black border border-white/20 rounded-lg px-4 py-3 outline-none"
+                />
+
+                <input
+                  type="text"
+                  placeholder="State"
+                  value={state}
+                  onChange={(e) =>
+                    setState(e.target.value)
+                  }
+                  className="bg-black border border-white/20 rounded-lg px-4 py-3 outline-none"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Pincode"
+                  value={pincode}
+                  onChange={(e) =>
+                    setPincode(e.target.value)
+                  }
+                  className="bg-black border border-white/20 rounded-lg px-4 py-3 outline-none"
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* RIGHT */}
+          <div>
+
+            <div className="bg-[#111] border border-white/10 rounded-2xl p-6 sticky top-28">
+
+              <h2 className="text-2xl font-bold mb-6">
+                Order Summary
+              </h2>
+
+              <div className="space-y-4 mb-6">
+
+                {cartItems.map(
+                  (item: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex justify-between text-sm"
+                    >
+                      <span>
+                        {item.name}
+                        {" "}
+                        x
+                        {" "}
+                        {item.quantity}
+                      </span>
+
+                      <span>
+                        ₹
+                        {(item.salePrice ||
+                          item.price) *
+                          item.quantity}
+                      </span>
+                    </div>
+                  )
+                )}
+
+              </div>
+
+              <div className="border-t border-white/10 pt-4 space-y-4">
+
+                <div className="flex justify-between">
+                  <span>Total MRP</span>
+                  <span>₹{totalMRP}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Discount on MRP</span>
+                  <span className="text-green-400">
+                    -₹{discount}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Coupon Discount</span>
+                  <span className="text-green-400">
+                    -₹0
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Platform Fee</span>
+                  <span className="text-green-400">
+                    FREE
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span className="text-green-400">
+                    FREE
+                  </span>
+                </div>
+
+                <div className="border-t border-white/10 pt-4 flex justify-between items-start text-xl font-bold">
+
+                  <div>
+                    <p>Total Amount</p>
+                    <p className="text-xs text-gray-500 font-normal mt-1">
+                      Inclusive of GST
+                    </p>
+                  </div>
+
+                  <span>
+                    ₹{totalAmount}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <button
+  onClick={placeOrder}
+  className="w-full mt-6 py-4 rounded-full bg-white text-black font-bold hover:opacity-90 transition"
+>
+  PLACE ORDER
+</button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </main>
   );
-
 }
