@@ -133,11 +133,7 @@ export default function Home() {
 
         {/* NAVBAR */}
 
-        <Navbar
-  cartCount={
-    cartItems.length
-  }
-/>
+        <Navbar/>
         {/* HERO */}
 
         <Hero />

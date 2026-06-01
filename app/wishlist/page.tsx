@@ -13,7 +13,7 @@ export default function WishlistPage() {
   if (!user) {
     return (
       <>
-        <Navbar cartCount={0} />
+        <Navbar/>
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-6">
           <p>Login to view wishlist</p>
           <button
@@ -29,7 +29,7 @@ export default function WishlistPage() {
 
   return (
     <>
-      <Navbar cartCount={0} />
+      <Navbar/>
 
       <main className="bg-[#0a0a0a] text-white min-h-screen pt-24 px-6">
         <h1 className="text-3xl font-bold mb-8">Your Wishlist</h1>

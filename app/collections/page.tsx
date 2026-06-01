@@ -64,7 +64,7 @@ export default function CollectionsPage() {
 
   return (
     <>
-      <Navbar cartCount={0} />
+      <Navbar />
 
       <main className="bg-[#0a0a0a] text-white min-h-screen pt-24">
         <div className="max-w-7xl mx-auto px-4 flex gap-6">
