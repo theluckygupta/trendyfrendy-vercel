@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import Navbar from "@/components/Navbar";
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -45,6 +46,8 @@ export default function RootLayout({
             </CartProvider>
           </WishlistProvider>
         </AuthProvider>
+              <Navbar />
+
 
       </body>
     </html>

@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react";
-
 import { auth } from "@/lib/firebase";
 
 import {
@@ -18,7 +17,6 @@ import {
 } from "firebase/auth";
 
 const AuthContext = createContext<any>(null);
-
 export function AuthProvider({
   children,
 }: {
