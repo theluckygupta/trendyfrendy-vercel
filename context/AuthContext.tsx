@@ -18,6 +18,7 @@ import {
 
 const AuthContext = createContext<any>(null);
 export function AuthProvider({
+  
   children,
 }: {
   children: React.ReactNode;
@@ -32,7 +33,6 @@ export function AuthProvider({
       setUser(currentUser);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -62,6 +62,7 @@ export function AuthProvider({
     <AuthContext.Provider
       value={{
         user,
+        loading,
         loginWithGoogle, // ✅ FIXED (matches wishlist)
         logout,
       }}

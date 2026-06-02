@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
 
 export default function CheckoutPage() {
+
   const { cartItems, clearCart } = useCart();
   const { user } = useAuth();
   const [countryCode, setCountryCode] = useState("+91");
@@ -21,34 +22,37 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
-  useEffect(() => {
-    async function fetchLocation() {
-      if (pincode.length !== 6) return;
+useEffect(() => {
+  console.log("Current User:", user);
+}, [user]);
 
-      try {
-        const res = await fetch(
-          `https://api.postalpincode.in/pincode/${pincode}`
-        );
+useEffect(() => {
+  async function fetchLocation() {
+    if (pincode.length !== 6) return;
 
-        const data = await res.json();
+    try {
+      const res = await fetch(
+        `https://api.postalpincode.in/pincode/${pincode}`
+      );
 
-        if (
-          data[0]?.Status === "Success" &&
-          data[0]?.PostOffice?.length
-        ) {
-          const postOffice = data[0].PostOffice[0];
+      const data = await res.json();
 
-          // Better than Name
-          setCity(postOffice.District || "");
-          setState(postOffice.State || "");
-        }
-      } catch (error) {
-        console.error(error);
+      if (
+        data[0]?.Status === "Success" &&
+        data[0]?.PostOffice?.length
+      ) {
+        const postOffice = data[0].PostOffice[0];
+
+        setCity(postOffice.District || "");
+        setState(postOffice.State || "");
       }
+    } catch (error) {
+      console.error(error);
     }
+  }
 
-    fetchLocation();
-  }, [pincode]);
+  fetchLocation();
+}, [pincode]);
 
   const totalMRP = cartItems.reduce(
     (total: number, item: any) =>
@@ -153,6 +157,7 @@ export default function CheckoutPage() {
       alert("Failed to place order");
     }
   }
+console.log("Checkout user:", user);
 
   return (
     <>
