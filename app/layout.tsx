@@ -38,6 +38,7 @@ export default function RootLayout({
           <WishlistProvider>
             <CartProvider>
 
+              <Navbar />
               {/* 🔥 MAIN WRAPPER (FIXED) */}
               <div className="min-h-full flex flex-col bg-black text-white">
                 {children}
@@ -46,7 +47,6 @@ export default function RootLayout({
             </CartProvider>
           </WishlistProvider>
         </AuthProvider>
-              <Navbar />
 
 
       </body>
